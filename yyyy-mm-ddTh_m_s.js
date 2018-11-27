@@ -21,23 +21,22 @@ function run(input, parameters) {
             hours = hours % 12;
             hours = (hours != 0) ? hours : 12; // 0時は12時と表示する
         }
-        var replaceStrArray =
-            {
-                'YYYY': year,
-                'Y': year,
-                'MM': to_2digit(month),
-                'M': month,
-                'DD': to_2digit(day),
-                'D': day,
-                'WW': weekday,
-                'hh': to_2digit(hours),
-                'h': hours,
-                'mm': to_2digit(minutes),
-                'm': minutes,
-                'ss': to_2digit(secounds),
-                's': secounds,
-                'AP': ampm,
-            };
+        var replaceStrArray = {
+            'YYYY': year,
+            'Y': year,
+            'MM': to_2digit(month),
+            'M': month,
+            'DD': to_2digit(day),
+            'D': day,
+            'WW': weekday,
+            'hh': to_2digit(hours),
+            'h': hours,
+            'mm': to_2digit(minutes),
+            'm': minutes,
+            'ss': to_2digit(secounds),
+            's': secounds,
+            'AP': ampm,
+        };
         var replaceStr = '(' + Object.keys(replaceStrArray).join('|') + ')';
         var regex = new RegExp(replaceStr, 'g');
         ret = format.replace(regex, function (str) {
@@ -46,5 +45,5 @@ function run(input, parameters) {
         return ret;
     }
 
-	return datetostr(new Date(), 'YYYY-MM-DDThh_mm_ss@JST', false);
+    return datetostr(new Date(), 'YYYY-MM-DDThh_mm_ss@JST', false);
 }
