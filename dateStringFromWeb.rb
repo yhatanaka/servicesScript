@@ -85,16 +85,16 @@ EOS
 end #def
 
 
-# chock test case
-testFlag = false
-if ARGV[0] == 'test'
-	testFlag = true
-	ARGV.shift
-end #if
+# 最後に「test」つけると debug モード
+# testFlag = false
+# if ARGV.shift == 'test'
+# 	testFlag = true
+# end #if
+
 
 
 dateString =''
-url = ARGV[0]
+url = ARGV.shift
 # allow https => http redirect
 doc = Nokogiri::HTML(open(url, :allow_redirections => :all))
 siteDomain = url.match(%r(https?://([^/]+)))[1]

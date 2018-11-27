@@ -1,5 +1,9 @@
 function run(input, parameters) {
-	
+
+    function to_2digit(str) {
+        return ('0' + str).slice(-2);
+    }
+
     function datetostr(date, format, is12hours) {
         var weekday = ["日", "月", "火", "水", "木", "金", "土"];
         if (!format) {
@@ -21,16 +25,16 @@ function run(input, parameters) {
             {
                 'YYYY': year,
                 'Y': year,
-                'MM': ('0' + (month)).slice(-2),
+                'MM': to_2digit(month),
                 'M': month,
-                'DD': ('0' + (day)).slice(-2),
+                'DD': to_2digit(day),
                 'D': day,
                 'WW': weekday,
-                'hh': ('0' + hours).slice(-2),
+                'hh': to_2digit(hours),
                 'h': hours,
-                'mm': ('0' + minutes).slice(-2),
+                'mm': to_2digit(minutes),
                 'm': minutes,
-                'ss': ('0' + secounds).slice(-2),
+                'ss': to_2digit(secounds),
                 's': secounds,
                 'AP': ampm,
             };
