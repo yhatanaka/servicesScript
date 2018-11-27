@@ -30,6 +30,7 @@ end #def
 
 def scrp(htmlObj, domainSelecter, isTest)
 	domainDateDom =<<'EOS'
+biz-journal.jp	#entryDateBox > span.entryDate
 bizzine.jp	#container > main > div.main > article > p:nth-child(7) > span
 blogs.yahoo.co.jp	#atcllst > div > div:nth-child(2) > ul > li.date > a > span
 business.nikkeibp.co.jp	#topIcons > p
@@ -59,11 +60,14 @@ webronza.asahi.com	#contents > div.entryInfo > p.date
 www.asahi.com	#MainInner > div.ArticleTitle > div.Title > p.LastUpdated
 www.atmarkit.co.jp	#update
 www.foocom.net	#date
+www.huffingtonpost.jp	div.timestamp > span.timestamp__date.timestamp__date--published
 www.itmedia.co.jp	#update
+www.kankyo-business.jp	#mainCont > div.article > div.inner > div.clearfix.mb20 > div > div.sns_box_lt > span
 www.lifehacker.jp	body > main > div:nth-child(2) > div.lh-primary > div.lh-entryDetail > div > div.lh-entryDetail-header > div > div > p > time
 www.mag2.com	#metadate
 www.mylohas.net	body > main > div.l-Block.-postRegular > div.l-Block_PrimaryWrap > div > div.po-Post > div.po-Post_Post > div > div.po-Post_PostContainerLeft > p.po-Post_PostDate > time
 www.newsweekjapan.jp	#content > div.contentPanel.noShadowThis_noShadowBottom.clickableArea.containTitleTxt_RR > div.panelNoShadow.entryDetail.clearfix > div.clearfix > div.entryDetailHeadline.border_btm.clearfix > div > div.entryDetailData > div.date
+www.nikkei.com	#CONTENTS_MAIN > div.cmn-section.cmn-indent > dl.cmn-article_status.cmn-clearfix > dd
 www.nippon.com	#main > dl.detail_maintit > dd.data_lang.cb > span
 www.technologyreview.jp	#outline > p > span
 yamagata-np.jp	#time
