@@ -87,16 +87,17 @@ EOS
 end #def
 
 
-# 最後に「test」つけると debug モード
-# testFlag = false
-# if ARGV.shift == 'test'
-# 	testFlag = true
-# end #if
-
 
 
 dateString =''
 url = ARGV.shift
+
+# 最後に「test」つけると debug モード
+testFlag = false
+if ARGV.shift == 'test'
+	testFlag = true
+end #if
+
 # allow https => http redirect
 doc = Nokogiri::HTML(open(url, :allow_redirections => :all))
 siteDomain = url.match(%r(https?://([^/]+)))[1]
