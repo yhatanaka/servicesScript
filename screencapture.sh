@@ -1,0 +1,1 @@
+screencapture -tjpg -R100,180,1800,1280 ~/Downloads/著作権/"`date '+%F'`-`date '+%H-%M-%S'`.jpg"
