@@ -29,7 +29,7 @@ def makeHashFromString(str)
 end #def
 
 def scrp(htmlObj, domainSelecter, isTest)
-	domainDateDom =<<'EOS'
+	domainDateDom =<<~'EOS'
 biz-journal.jp	#entryDateBox > span.entryDate
 bizzine.jp	#container > main > div.main > article > p:nth-child(7) > span
 blogs.yahoo.co.jp	#atcllst > div > div:nth-child(2) > ul > li.date > a > span
@@ -71,7 +71,9 @@ www.nikkei.com	#CONTENTS_MAIN > div.cmn-section.cmn-indent > dl.cmn-article_stat
 www.nippon.com	#main > dl.detail_maintit > dd.data_lang.cb > span
 www.technologyreview.jp	#outline > p > span
 yamagata-np.jp	#time
+		sci-tech.jugem.jp	#main > div:nth-child(2) > div.entry_date
 EOS
+
 	domainSelecterHash = makeHashFromString(domainDateDom)
  	if domainSelecterHash[domainSelecter] !=nil
  		if isTest
