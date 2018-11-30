@@ -42,7 +42,7 @@ domainDateDom =<<~'EOS'
 	www.lifehacker.jp	body > main > div:nth-child(2) > div.lh-primary > div.lh-entryDetail > div > div.lh-entryDetail-header > div > div > p > time
 	www.mag2.com	#metadate
 	www.mylohas.net	body > main > div.l-Block.-postRegular > div.l-Block_PrimaryWrap > div > div.po-Post > div.po-Post_Post > div > div.po-Post_PostContainerLeft > p.po-Post_PostDate > time
-	www.newsweekjapan.jp	#content > div.contentPanel.noShadowThis_noShadowBottom.clickableArea.containTitleTxt_RR > div.panelNoShadow.entryDetail.clearfix > div.clearfix > div.entryDetailHeadline.border_btm.clearfix > div > div.entryDetailData > div.date
+	www.newsweekjapan.jp	div.entryDetailHeadline.border_btm.clearfix > div > div.entryDetailData > div.date
 	www.nikkei.com	#CONTENTS_MAIN > div.cmn-section.cmn-indent > dl.cmn-article_status.cmn-clearfix > dd
 	www.nippon.com	#main > dl.detail_maintit > dd.data_lang.cb > span
 	www.technologyreview.jp	#outline > p > span
