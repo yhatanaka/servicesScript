@@ -46,6 +46,7 @@ domainDateDom =<<~'EOS'
 	www.nikkei.com	#CONTENTS_MAIN > div.cmn-section.cmn-indent > dl.cmn-article_status.cmn-clearfix > dd
 	www.nippon.com	#main > dl.detail_maintit > dd.data_lang.cb > span
 	www.technologyreview.jp	#outline > p > span
+	www.tokyo-np.co.jp	#Contents > div.News-detail > div.News-headarea > div > p
 	yamagata-np.jp	#time
 EOS
 
