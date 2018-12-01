@@ -11,7 +11,7 @@ domainDateDom =<<~'EOS'
 	business.nikkeibp.co.jp	#topIcons > p
 	codezine.jp	#article_body_block > div.authorDetail.cf > div.day
 	courrier.jp	#container > section.article_detail_area > article > div.article_meta > div > span
-	cyblog.jp	body > div.l-container > div.l-contents > div > div > main > article > header > div > ul > li.c-meta__item.c-meta__item--published
+	cyblog.jp	li.c-meta__item.c-meta__item--published
 	digital.asahi.com	#MainInner > div.ArticleTitle > div.Title > p.LastUpdated
 	gihyo.jp	#article > div:nth-child(1) > div.sectionProperty > p.date
 	ikoma.cocolog-nifty.com	#beta-inner > h2
