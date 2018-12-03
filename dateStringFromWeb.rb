@@ -31,6 +31,7 @@ domainDateDom =<<~'EOS'
 	sci-tech.jugem.jp	#main > div:nth-child(2) > div.entry_date
 	tech.nikkeibp.co.jp	#article > div.articleTitleBox > div.infoWrap > div.date
 	techfactory.itmedia.co.jp	#update
+	tmaita77.blogspot.com	#Blog1 > div.blog-posts.hfeed > div:nth-child(1) > h2 > span
 	toyokeizai.net	#signage > div.author-date.clearfix.defaultarticle > div.date
 	webronza.asahi.com	#contents > div.entryInfo > p.date
 	www.asahi.com	#MainInner > div.ArticleTitle > div.Title > p.LastUpdated
