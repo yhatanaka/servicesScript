@@ -12,16 +12,18 @@ domainDateDom =<<~'EOS'
 	codezine.jp	#article_body_block > div.authorDetail.cf > div.day
 	courrier.jp	#container > section.article_detail_area > article > div.article_meta > div > span
 	cyblog.jp	li.c-meta__item.c-meta__item--published
+	d.hatena.ne.jp	#days > div > h2 > a > span.date
 	digital.asahi.com	#MainInner > div.ArticleTitle > div.Title > p.LastUpdated
 	gihyo.jp	#article > div:nth-child(1) > div.sectionProperty > p.date
 	ikoma.cocolog-nifty.com	#beta-inner > h2
 	internet.watch.impress.co.jp	#main > article > div > div.article-info > p.publish-date
 	japan.cnet.com	div.leaf-headline-inner > span.date > a
-	japan.zdnet.com	#contents-left > p
+	japan.zdnet.com	#contents-left > p.author
 	japanese.engadget.com	div.t-meta-small\@s.t-meta\@m\+ > div
 	karapaia.com	#main > div.widget.widget-entry > div.widget-header > div > span
 	labaq.com	#blog > div.fullbody > div.blogbodytop > div.date
 	lite-ra.com	#entryDate
+	mainichi.jp	div.article-info > p > time
 	markezine.jp	#contents > div:nth-child(8) > div.detailBlock > div.authorDetail.cf > div.day
 	medical.nikkeibp.co.jp	body > div.body > div.main > div.wrapper > div.contents > div.article > div.article-header > div.wrapper > p.date
 	monoist.atmarkit.co.jp	#update
@@ -31,6 +33,7 @@ domainDateDom =<<~'EOS'
 	sci-tech.jugem.jp	#main > div:nth-child(2) > div.entry_date
 	tech.nikkeibp.co.jp	#article > div.articleTitleBox > div.infoWrap > div.date
 	techfactory.itmedia.co.jp	#update
+	techtarget.itmedia.co.jp	#cmsDate > #update
 	tmaita77.blogspot.com	#Blog1 > div.blog-posts.hfeed > div:nth-child(1) > h2 > span
 	toyokeizai.net	#signage > div.author-date.clearfix.defaultarticle > div.date
 	webronza.asahi.com	#contents > div.entryInfo > p.date
@@ -38,8 +41,9 @@ domainDateDom =<<~'EOS'
 	www.atmarkit.co.jp	#update
 	www.foocom.net	#date
 	www.huffingtonpost.jp	div.timestamp > span.timestamp__date.timestamp__date--published
+	www.ibm.com	div.dw-article-authordate > span.dw-article-pubdate
 	www.itmedia.co.jp	#update
-	www.kankyo-business.jp	#mainCont > div.article > div.inner > div.clearfix.mb20 > div > div.sns_box_lt > span
+	www.kankyo-business.jp	div.sns_box_lt > span
 	www.lifehacker.jp	body > main > div:nth-child(2) > div.lh-primary > div.lh-entryDetail > div > div.lh-entryDetail-header > div > div > p > time
 	www.mag2.com	#metadate
 	www.mylohas.net	body > main > div.l-Block.-postRegular > div.l-Block_PrimaryWrap > div > div.po-Post > div.po-Post_Post > div > div.po-Post_PostContainerLeft > p.po-Post_PostDate > time
@@ -50,7 +54,7 @@ domainDateDom =<<~'EOS'
 	www.tokyo-np.co.jp	#Contents > div.News-detail > div.News-headarea > div > p
 	yamagata-np.jp	#time
 EOS
-
+# #mainCont > div.article > div.inner > div.clearfix.mb20 > div.sns_box_lt > span > a
 
 def scrp_ismedia(htmlObj)
  	outputDate =''
@@ -79,7 +83,7 @@ def scrp(htmlObj, domainSelecter, aDomainDateDom, isTest)
 	dateCssPath = domainSelecterHash[domainSelecter]
  	if dateCssPath !=nil
  		if isTest
-			return htmlObj.at_css(domainSelecterHash[domainSelecter])
+			return htmlObj.at_css(dateCssPath)
 		else
 			return htmlObj.at_css(dateCssPath).text.gsub(/\s\s+/, '')
 		end #if 
