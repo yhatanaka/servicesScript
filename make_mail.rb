@@ -40,6 +40,7 @@ nextOnAirDay = (3..23).each do |i|
 	end #if
 end #each
 
+episodeYear = nextOnAirDay[0].year
 episodeMonth = nextOnAirDay[0].month
 episodeNumber = nextOnAirDay[1]
 
@@ -49,10 +50,9 @@ mailBodyOrig = <<EOS
 水落さま
 
 お世話になっております、畠中です。
-ノラーソ・ビヤ・マールキ　2018年#{episodeMonth}月#{episodeNumberString[episodeNumber]}分です。
+ノラーソ・ビヤ・マールキ　#{episodeYear}年#{episodeMonth}月#{episodeNumberString[episodeNumber]}分です。
 よろしくお願いいたします。
 EOS
-
 
 mailBody = mailBodyOrig.gsub(/(\r\n|\r|\n)/){"\n"}
 openCommand = 'open mailto:' + toAddress + %Q[\?subject='] + mailTitle + %q['\&body='] + mailBody + %Q[\']
