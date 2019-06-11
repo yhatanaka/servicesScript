@@ -20,6 +20,7 @@ domainDateDom =<<~'EOS'
 	japan.cnet.com	div.leaf-headline-inner > span.date > a
 	japan.zdnet.com	#contents-left > p.author
 	japanese.engadget.com	div.t-meta-small\@s.t-meta\@m\+ > div
+	jbpress.ismedia.jp	body > div > div.l-contents > main > article > header > div.l-row > div.article-header-info > span
 	karapaia.com	#main > div.widget.widget-entry > div.widget-header > div > span
 	labaq.com	#blog > div.fullbody > div.blogbodytop > div.date
 	lite-ra.com	#entryDate
@@ -28,7 +29,7 @@ domainDateDom =<<~'EOS'
 	medical.nikkeibp.co.jp	body > div.body > div.main > div.wrapper > div.contents > div.article > div.article-header > div.wrapper > p.date
 	monoist.atmarkit.co.jp	#update
 	natgeo.nikkeibp.co.jp	#newsArticle > div.article > div > div.articleTitleBox > div.toolBox > div
-	news.mynavi.jp	body > div.wrapper > div.container > div.body > main > div.article-header > p.article-header__update
+	news.mynavi.jp	p.article-header__update
 	news.yahoo.co.jp	#content-body > section > div > div.hd > div.articleInfo > span
 	sci-tech.jugem.jp	#main > div:nth-child(2) > div.entry_date
 	style.nikkei.com	#shareBoxTop > p
