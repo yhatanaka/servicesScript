@@ -20,7 +20,7 @@ domainDateDom =<<~'EOS'
 	japan.cnet.com	div.leaf-headline-inner > span.date > a
 	japan.zdnet.com	#contents-left > p.author
 	japanese.engadget.com	div.t-meta-small\@s.t-meta\@m\+ > div
-	jbpress.ismedia.jp	body > div > div.l-contents > main > article > header > div.l-row > div.article-header-info > span
+	jbpress.ismedia.jp	body > div > div.l-contents > main > article > header > div.l-row > div.article-header-info
 	karapaia.com	#main > div.widget.widget-entry > div.widget-header > div > span
 	labaq.com	#blog > div.fullbody > div.blogbodytop > div.date
 	lite-ra.com	#entryDate
