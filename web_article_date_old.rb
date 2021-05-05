@@ -24,7 +24,7 @@ domainDateDom =<<~'EOS'
 	karapaia.com	#main > div.widget.widget-entry > div.widget-header > div > span
 	labaq.com	#blog > div.fullbody > div.blogbodytop > div.date
 	lite-ra.com	#entryDate
-	mainichi.jp	span.articletag-date.is-articledetail
+	mainichi.jp	div.article-info > p > time
 	markezine.jp	#contents > div:nth-child(8) > div.detailBlock > div.authorDetail.cf > div.day
 	medical.nikkeibp.co.jp	body > div.body > div.main > div.wrapper > div.contents > div.article > div.article-header > div.wrapper > p.date
 	monoist.atmarkit.co.jp	#update
@@ -57,13 +57,14 @@ domainDateDom =<<~'EOS'
 	www.tokyo-np.co.jp	#Contents > div.News-detail > div.News-headarea > div > p
 	yamagata-np.jp	#time
 EOS
+# #mainCont > div.article > div.inner > div.clearfix.mb20 > div.sns_box_lt > span > a
 
 def scrp_ismedia(htmlObj)
-	outputDate =''
-	htmlObj.at_css('body > div.blockMain > div.blockContainer.display-flex-wrap > div.blockContainer_left2 > div.articleHeader > div.elementSectionHeadingsWithSuffix').css('img').each do |aImage|
-		if imageDateString = aImage.attribute('src').text.match(/.+([0-9_]+)\.png/)
-			outputDate += imageDateString[1]
-		end #if
+ 	outputDate =''
+ 	htmlObj.at_css('body > div.blockMain > div.blockContainer.display-flex-wrap > div.blockContainer_left2 > div.articleHeader > div.elementSectionHeadingsWithSuffix').css('img').each do |aImage|
+	  	if imageDateString = aImage.attribute('src').text.match(/.+([0-9_]+)\.png/)
+	  		outputDate += imageDateString[1]
+	  	end #if
 	end #eack
 	return outputDate.gsub('_','-')
 end #def
@@ -83,7 +84,7 @@ end #def
 def scrp(htmlObj, domainSelecter, aDomainDateDom)
 	domainSelecterHash = makeHashFromString(aDomainDateDom)
 	dateCssPath = domainSelecterHash[domainSelecter]
-	if dateCssPath !=nil
+ 	if dateCssPath !=nil
 		return htmlObj.at_css(dateCssPath).text
 	else
 		return ''
