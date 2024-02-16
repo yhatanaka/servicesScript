@@ -14,6 +14,11 @@ def url_http(str)
 	end
 end
 
+def removeDir(str)
+	return str.sub(/\/[a-zA-Z0-9_]+\.[a-zA-Z]+\?[a-zA-Z]+\=/, "")
+
+end
+
 def removeGetParam(str)
 	return str.gsub(/[&\?][a-z0-9]+=.*/, "")
 end
@@ -26,11 +31,13 @@ def removeParam(str)
 	return str.sub(/html\?.+$/,"html")
 end
 
+
 inputURLary = inputURL.split("\n")
 
 inputURLary.each do |f|
-
-	sanitizedURL = removeParam(removeCommaDigit(removeGetParam(url_http(URI.unescape(f)))))
+	sanitizedURL = url_http(URI.unescape(f))
+	sanitizedURL = removeDir(sanitizedURL)
+	sanitizedURL = removeParam(removeCommaDigit(removeGetParam(sanitizedURL)))
 	result.push(sanitizedURL)
 
 end
