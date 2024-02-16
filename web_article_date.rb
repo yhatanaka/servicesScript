@@ -47,7 +47,6 @@ domainDateDom =<<~'EOS'
 	www.ibm.com	div.dw-article-authordate > span.dw-article-pubdate
 	www.itmedia.co.jp	#update
 	www.kankyo-business.jp	div.sns_box_lt > span
-	www.lifehacker.jp	body > main > div:nth-child(2) > div.lh-primary > div.lh-entryDetail > div > div.lh-entryDetail-header > div > div > p > time
 	www.mag2.com	#metadate
 	www.mylohas.net	body > main > div.l-Block.-postRegular > div.l-Block_PrimaryWrap > div > div.po-Post > div.po-Post_Post > div > div.po-Post_PostContainerLeft > p.po-Post_PostDate > time
 	www.newsweekjapan.jp	div.entryDetailHeadline.border_btm.clearfix > div > div.entryDetailData > div.date
@@ -56,6 +55,8 @@ domainDateDom =<<~'EOS'
 	www.technologyreview.jp	#outline > p > span
 	www.tokyo-np.co.jp	#Contents > div.News-detail > div.News-headarea > div > p
 	yamagata-np.jp	#time
+	nazology.net	div.post-head > div > div.post-head__detail > div.post-head__date
+	www.lifehacker.jp	#__next > div.block_lBlock__WOhfg > div > div.article_pArticle_Head__OdY75.false > div.article_pArticle_MetaWrapper__PUbqB > p.article_pArticle_MetaDate__lPp5c
 EOS
 
 def scrp_ismedia(htmlObj)
