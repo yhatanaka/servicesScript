@@ -444,10 +444,10 @@ def guideCharge(fee, payment, coupon, cancel)
 	charge = nil
 	unless fee.nil?
 		if cancel == '▲' # 当日キャンセルは半額振込、手数料 10% 差し引く
-			payment = fee*0.45
+			charge = fee*(0.45)
 		else # 催行
 			if payment == :口座 # 手数料 10% 差し引く
-				charge = fee*0.9
+				charge = fee*(0.9)
 			elsif payment == :現金 # 手数料 10% 徴収
 				if coupon.nil?
 					charge = fee*(-0.1)
