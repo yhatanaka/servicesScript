@@ -22,9 +22,11 @@ inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 #headersFile = ARGV.shift
 #headersCheckedFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/2024-01-05_column.csv'
 
-inputCsv = CSV.parse(inputFileContents, headers: true)
-
-#puts inputCsv
+#inputCsv = CSV.table(inputFileContents)
+header_converter = lambda {|h| h.to_sym}
+inputCsv = CSV.parse(inputFileContents, headers: true, header_converters: header_converter)
+#inputCsv = CSV.parse(inputFileContents, headers: true, header_converters: :symbol)
+#pp inputCsv[1]
 #exit
 
 def findOverlap(aCsv)
@@ -171,14 +173,14 @@ reqColumns = ['申込番号', '管理番号', 'エリア', 'エリア名', '団�
 def selectCsvColumn3(aCsv,columnsAry)
 	aCsv.by_col!
 	aCsv.delete_if {|columnName, values|
-		!columnsAry.include?(columnName)
+		!columnsAry.include?(columnName.to_s)
 	}
 	aCsv.by_row!
 	aCsv.delete_if {|aCsvRow|
-		aCsvRow['案内人1'].nil?
+		aCsvRow[:案内人1].nil?
 	}
 	aCsv.delete_if {|aCsvRow|
-		aCsvRow['キャンセル'] != '〇' && aCsvRow['キャンセル'] != '▲'
+		aCsvRow[:キャンセル] != '〇' && aCsvRow[:キャンセル] != '▲'
 	}
 	return aCsv
 end #def
@@ -187,12 +189,12 @@ end #def
 #「口座振替」「現金払い」の表記を統一
 def payment(aCsv)
 	aCsv.each {|aCsvRow|
-		payment = aCsvRow['支払い'] || aCsvRow['支払い方法']
+		payment = aCsvRow[:支払い] || aCsvRow[:支払い方法]
 		unless payment.nil?
 			if payment.match?(/口座.*|.*振込.*/)
-				payment = '口座'
+				payment = :口座
 			elsif payment.match?(/現金.*/)
-				payment = '現金'
+				payment = :現金
 			end #if
 		end #unless
 		aCsvRow[:payment] = payment
@@ -204,7 +206,7 @@ end #def
 def coupon(aCsv)
 	aCsv.each {|aCsvRow|
 		couponFlag = true
-		if aCsvRow['クーポン'].nil?
+		if aCsvRow[:クーポン].nil?
 			couponFlag = false
 		end #if
 		aCsvRow[:coupon] = couponFlag
@@ -212,7 +214,7 @@ def coupon(aCsv)
 	return aCsv
 end #def
 
-# base: 必要な案件データ
+# base: 必要な案件データを出力
 if ARGV.include?('base')
 	allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
 	puts coupon(payment(allCsv3)).to_csv
@@ -295,7 +297,7 @@ content = <<EOS
 一関　敦子
 加川　正夫
 齋藤　智也
-石𣘺　英一
+石橋　英一
 菊地　美栄子
 小嶋　真紀子
 小嶋　裕
@@ -319,21 +321,13 @@ content = <<EOS
 新井　真知子
 EOS
 
-
 # 石𣘺　英一
 #guideNameAry = content.chomp.gsub(/𣘺/, '橋').split(/\R/)
 guideNameAry = content.chomp.split(/\R/)
 
-#allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
-#dataCsv = coupon(payment(allCsv3))
-
-dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base.csv'
-dataCsv = CSV.read(dataFile, headers: true)
-
-
 # aCsvRowの中の、columnsAryの項目の配列を取得
 def pickupColumns(aCsvRow, columnsAry)
-	return columnsAry.map {|item| aCsvRow[item]}
+	return columnsAry.map {|item| aCsvRow[item.to_sym]}
 end #def
 
 $guideNameColumn = ['案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8']
@@ -392,7 +386,8 @@ end #def
 # 「[0-9]+ 〜〜」->「〜〜」
 # 「石.　英一」->「石橋　英一」
 def normalizedName(aName)
-	return aName.gsub(/ /, '').gsub(/[0-9]/, '')
+	return aName
+#	return aName.gsub(/ /, '').gsub(/[0-9]/, '')
 #.gsub(/石.　英一/, '石橋　英一')
 end #def
 
@@ -436,28 +431,35 @@ def getGuidesHash(namesAry, timesAry, feesAry)
 	namesAry.each_with_index {|aName, idx|
 # ガイド名入ってるところを…
 		unless aName.nil?
-			guideName = aName
 			guideTimeHMSAry = /([0-9]+)時([0-9]+)分([0-9]+)秒/.match(timesAry[idx]).to_a.values_at(1,2,3).map{|item| item.to_i}
 			guideFee = feesAry[idx].to_i
-			guidesHashAry << {:name => guideName, :time => timeRangeFormat(guideTimeHMSAry), :fee => guideFee}
+			guidesHashAry << {:name => aName, :time => timeRangeFormat(guideTimeHMSAry), :fee => guideFee}
 		end #unless
 	}
 	return guidesHashAry
 end #def
 
 # ガイド料、支払い方法、クーポン から、振込額/納付手数料を計算
-def guideCharge(fee, payment, coupon)
+def guideCharge(fee, payment, coupon, cancel)
 	charge = nil
 	unless fee.nil?
-		if payment == '口座'
-			charge = fee*0.9
-		elsif payment == '現金'
-			if coupon.downcase == 'true' # Numbers で編集・書き出したもの(couponが大文字)に対処
-				charge = fee*(-0.2)
-			elsif coupon.downcase == 'false'
-				charge = fee*(-0.1)
-			end #if
-		end #if
+		if cancel == '▲' # 当日キャンセルは半額振込、手数料 10% 差し引く
+			payment = fee*0.45
+		else # 催行
+			if payment == :口座 # 手数料 10% 差し引く
+				charge = fee*0.9
+			elsif payment == :現金 # 手数料 10% 徴収
+				if coupon.nil?
+					charge = fee*(-0.1)
+				elsif !coupon
+					charge = fee*(-0.1)
+				elsif coupon
+					charge = fee*(-0.2)
+#				elsif coupon.downcase == 'true' # Numbers で編集・書き出したもの(couponが大文字)に対処
+#					charge = fee*(-0.2)
+				end #if coupon
+			end #if payment
+		end #if cancel
 	end #unless
 	return charge.to_i || nil
 end #def
@@ -470,7 +472,7 @@ end #def
 
 # 各案件、ガイド(氏名、時間、料金)取得
 def getGuides(aCsv)
-	allTourGuidesHashAry = []
+#	allTourGuidesHashAry = []
 	table = CSV::Table.new([], headers: [:name, :time, :fee, :tourID, :date, :payment, :coupon, :charge])
 	aCsv.each_with_index {|aCsvRow, idx|
 		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
@@ -485,9 +487,9 @@ def getGuides(aCsv)
 #		end #if
 
 		getGuidesHash(guidesNameAry, guidesTimeAry, guidesFeeAry).each {|item|
-			aCharge = guideCharge(item[:fee], aCsvRow['payment'], aCsvRow['coupon'])
-			dateAry = /([0-9]{4})年([0-9]{2})月([0-9]{2})日/.match(aCsvRow['ガイド実施日2']).to_a.values_at(1,2,3).map{|item| item.to_i}
-			rowValues = item.values + [aCsvRow['管理番号'], dateFormat(dateAry), aCsvRow['payment'], aCsvRow['coupon'], aCharge]
+			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
+			dateAry = /([0-9]{4})年([0-9]{2})月([0-9]{2})日/.match(aCsvRow[:ガイド実施日2]).to_a.values_at(1,2,3).map{|item| item.to_i}
+			rowValues = item.values + [aCsvRow[:管理番号], dateFormat(dateAry), aCsvRow[:payment], aCsvRow[:coupon], aCharge]
 			table << CSV::Row.new(table.headers, rowValues)
 		}
 
@@ -495,10 +497,17 @@ def getGuides(aCsv)
 	return table
 end #def
 
+
+allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
+dataCsv = coupon(payment(allCsv3))
+
+#dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base1.csv'
+#dataCsv = CSV.read(dataFile, headers: true)
+
+# guide: 各案件での、ガイドごとのの支払い金額
 if ARGV.include?('guide')
 	puts getGuides(dataCsv).to_csv
 end #if
-# 「/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/guideCharge.csv」
 
 =begin
 
