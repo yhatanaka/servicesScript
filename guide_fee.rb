@@ -167,16 +167,19 @@ reqColumns = ['申込番号', '管理番号', 'エリア', 'エリア名', '団�
 #EOS
 #reqColumns = headers.split(/\R/)
 
-#ガイド名入ったものだけ、そして必要な列だけ取り出す。
+#必要な列だけ、ガイド名入ったもの・催行(⚪︎)・当日キャンセル(▲)取り出す。
 def selectCsvColumn3(aCsv,columnsAry)
-	aCsv.delete_if {|aCsvRow|
-		aCsvRow['案内人1'].nil?
-	}
 	aCsv.by_col!
 	aCsv.delete_if {|columnName, values|
 		!columnsAry.include?(columnName)
 	}
 	aCsv.by_row!
+	aCsv.delete_if {|aCsvRow|
+		aCsvRow['案内人1'].nil?
+	}
+	aCsv.delete_if {|aCsvRow|
+		aCsvRow['キャンセル'] != '〇' && aCsvRow['キャンセル'] != '▲'
+	}
 	return aCsv
 end #def
 
@@ -197,7 +200,7 @@ def payment(aCsv)
 	return aCsv
 end #def
 
-# クーポン
+# 「クーポン」に何か入力されていれば、クーポン利用とみなす
 def coupon(aCsv)
 	aCsv.each {|aCsvRow|
 		couponFlag = true
