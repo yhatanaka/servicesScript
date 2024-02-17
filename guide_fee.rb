@@ -18,7 +18,7 @@ inputFile = ARGV.shift
 inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 
 header_converter = lambda {|h| h.to_sym}
-inputCsv = CSV.parse(inputFileContents, headers: true, header_converters: header_converter)
+inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: header_converter)
 
 ## -- チェック用 --
 def findOverlap(aCsv)
