@@ -276,7 +276,8 @@ end #def
 # 各案件、ガイド(氏名、時間、料金)取得
 def getGuides(aCsv)
 	headersBaseAry = [:name, :time, :fee]
-	headersAddAry = [:tourID, :date, :payment, :coupon, :charge]
+# 追加分 :tourID(管理番号), :date,  :course(), :event(), :cancel(), :payment, :coupon, :charge
+	headersAddAry = [:tourID, :date, :course, :event, :cancel, :payment, :coupon, :charge]
 	headersAry = headersBaseAry + headersAddAry
 	table = CSV::Table.new([], headers: headersAry)
 	aCsv.each_with_index {|aCsvRow, idx|
@@ -290,7 +291,7 @@ def getGuides(aCsv)
 # 支払い(請求)額計算。口座/現金、クーポン、当日キャンセルから。
 			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
 # 案件のデータから、必要な項目持ってきて付加。headersAddAry に合わせる
-			rowValues = item.values + [aCsvRow[:管理番号], dateFormat(dateAry), aCsvRow[:payment], aCsvRow[:coupon], aCharge]
+			rowValues = item.values + [aCsvRow[:管理番号], dateFormat(dateAry), aCsvRow[:モデルコース], aCsvRow[:催し等], aCsvRow[:キャンセル], aCsvRow[:payment], aCsvRow[:coupon], aCharge]
 			table << CSV::Row.new(table.headers, rowValues)
 		}
 
