@@ -16,20 +16,10 @@ require 'csv'
 require 'pp'
 
 inputFile = ARGV.shift
-#inputFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/2024-02-16_SJIS.csv'
 inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
-#inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8').gsub(/石.　英一/, '石𣘺　英一')
 
-# 必要な列
-#headersFile = ARGV.shift
-#headersCheckedFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/2024-01-05_column.csv'
-
-#inputCsv = CSV.table(inputFileContents)
 header_converter = lambda {|h| h.to_sym}
 inputCsv = CSV.parse(inputFileContents, headers: true, header_converters: header_converter)
-#inputCsv = CSV.parse(inputFileContents, headers: true, header_converters: :symbol)
-#pp inputCsv[1]
-#exit
 
 def findOverlap(aCsv)
 #重複するヘッダ項目をチェック。各項目の個数を集計し、2回以上出た項目とその回数を表示。重複回避してから処理にかかる。
@@ -77,26 +67,6 @@ if ARGV.include?('test')
 	#printCsvHeaders(inputCsv)
 	exit
 end #if
-
-def reqColumns(headersCheckedCsvFile)
-# 必要な列
-# TRUE,FALSE,…
-# 項目1,項目2,…
-# 1・2行目取り出し、末尾の改行削除してカンマで分割して2つの配列に
-# ['TRUE','FALSE',…],['項目1','項目2',…]
-	headersStringAry = File.readlines(headersCheckedCsvFile)[0,2].map {|item| item.chomp.split(',')}
-# 項目1,項目2,…
-# TRUE,FALSE,…
-	headersCsvRow = CSV::Row.new(headersStringAry[1],headersStringAry[0])
-	headersCsvTable = CSV::Table.new([headersCsvRow])
-	#FALSEの列を削除、TRUEの列名だけ残す
-	headersCsvTable.by_col!
-	headersCsvTable.delete_if {|column, value|
-		value[0] == "FALSE"
-	}
-	return headersCsvTable.headers
-end #def
-#pp reqColumns(headersCheckedFile)
 
 reqColumns = ['申込番号', '管理番号', 'エリア', 'エリア名', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8', 'ガイド完了', 'ガイド時間', 'ガイド時間1', 'ガイド時間2', 'ガイド時間3', 'ガイド時間4', 'ガイド時間5', 'ガイド時間6', 'ガイド時間7', 'ガイド時間8', 'ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88', 'ガイド料金', 'ガイド料金2', 'ガイド料金3', 'ガイド料金4', 'ガイド料金5', 'ガイド料金6', 'ガイド料金7', 'ガイド料金8', 'ガイド料金合計', 'キャンセル', 'キャンセル2', '支払い', 'クーポン', 'ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88', 'ガイド料金総計', 'ガイド実施日2']
 
