@@ -6,9 +6,10 @@ Encoding.default_external = "UTF-8"
 
 # usage: ruby guide_fee.rb test/base/guide
 # test: 
-# base: 案件を出力
+# base: 案件を出力 → 保存
 # guide_check: ガイド人数・従事時間・ガイド料の各項目数が同じか
-# guide: ガイドごとの支払い金額集計
+# guide_name: 明細を出力するガイド一覧を出力 → 保存
+# guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
 require 'csv'
@@ -215,7 +216,7 @@ def coupon(aCsv)
 	return aCsv
 end #def
 
-# base: 必要な案件データを出力
+# base: 案件を出力 → 保存
 if ARGV.include?('base')
 	allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
 	puts coupon(payment(allCsv3)).to_csv
@@ -461,8 +462,13 @@ if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
 
-# guide: 各案件での、ガイドごとのの支払い金額
-if ARGV.include?('guide')
+# guide_name: 明細を出力するガイド一覧を出力 → 保存
+if ARGV.include?('guide_name')
+	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
+end #if
+
+# guide_fee: ガイドごとの支払い金額明細を出力 → 保存
+if ARGV.include?('guide_fee')
 	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
 end #if
 
