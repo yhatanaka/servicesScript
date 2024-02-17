@@ -311,7 +311,10 @@ def addNumInThisGuide(aTable)
 	table = CSV::Table.new([], headers: addHeaders)
 	guideHash.each {|guideName, guideAry|
 		count = 1
-		guideAry.each {|item|
+		guideArySorted = guideAry.sort {|a,b|
+			Date.parse(a[:date]) <=> Date.parse(b[:date])
+		}
+		guideArySorted.each {|item|
 			item[:num_in_this_guide] = count
 			table << item
 			count += 1
