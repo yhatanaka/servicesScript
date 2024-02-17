@@ -252,14 +252,16 @@ def guideCharge(fee, payment, coupon, cancel)
 			if payment == :口座 # 手数料 10% 差し引く
 				charge = fee*(0.9)
 			elsif payment == :現金 # 手数料 10% 徴収
-				if coupon.nil?
+				if coupon.nil? || !coupon
 					charge = fee*(-0.1)
-				elsif !coupon
-					charge = fee*(-0.1)
-				elsif coupon
+#				elsif !coupon
+#					charge = fee*(-0.1)
+				elsif coupon == true
 					charge = fee*(-0.2)
-#				elsif coupon.downcase == 'true' # Numbers で編集・書き出したもの(couponが大文字)に対処
-#					charge = fee*(-0.2)
+				elsif coupon.downcase == 'true' # Numbers で編集・書き出したもの(couponが大文字)に対処
+					charge = fee*(-0.2)
+				elsif coupon.downcase == 'false' # Numbers で編集・書き出したもの(couponが大文字)に対処
+					charge = fee*(-0.1)
 				end #if coupon
 			end #if payment
 		end #if cancel
