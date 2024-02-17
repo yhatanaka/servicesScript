@@ -502,6 +502,18 @@ def getGuides(aCsv)
 	return table
 end #def
 
+def addNumInThisGuide(aTable)
+	guideHash = {}
+	aTable.each {|aRow|
+#pp aRow[:name]
+		if guideHash[aRow[:name]].nil?
+			guideHash[aRow[:name]] = [aRow]
+		else
+			guideHash[aRow[:name]] << aRow
+		end #if
+	}
+	pp guideHash
+end #def
 
 allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
 dataCsv = coupon(payment(allCsv3))
@@ -516,7 +528,8 @@ end #if
 
 # guide: 各案件での、ガイドごとのの支払い金額
 if ARGV.include?('guide')
-	puts getGuides(dataCsv).to_csv
+#	puts getGuides(dataCsv).to_csv
+	addNumInThisGuide(getGuides(dataCsv))
 end #if
 
 =begin
