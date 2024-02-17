@@ -21,6 +21,7 @@ inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 header_converter = lambda {|h| h.to_sym}
 inputCsv = CSV.parse(inputFileContents, headers: true, header_converters: header_converter)
 
+## -- チェック用 --
 def findOverlap(aCsv)
 #重複するヘッダ項目をチェック。各項目の個数を集計し、2回以上出た項目とその回数を表示。重複回避してから処理にかかる。
 	headersAry = aCsv.headers
@@ -43,11 +44,6 @@ def findOverlap(aCsv)
 	return headersHash
 end #def
 
-##ヘッダーを出力。次の「必要な列」を抽出するため。
-def printCsvHeaders(aCsv)
-	puts aCsv.headers
-end #def
-
 # test
 if ARGV.include?('test')
 	pp findOverlap(inputCsv)
@@ -64,7 +60,6 @@ if ARGV.include?('test')
 			rowsHash[row['管理番号']] = [idx,row]
 		end #if
 	}
-	#printCsvHeaders(inputCsv)
 	exit
 end #if
 
@@ -139,14 +134,6 @@ guideNameFileName = 'guideName.csv'
 guideFile = baseDir + guideNameFileName
 guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converter)
 
-#content = guideCsv.by_col.
-# ガイド氏名の配列 重複あるので、uniq
-#print makeColumnAryFlat(guideCsv, '案内人氏名').uniq.join("\n").chomp
-#exit
-# 石𣘺　英一
-#guideNameAry = content.chomp.gsub(/𣘺/, '橋').split(/\R/)
-#guideNameAry = content.chomp.split(/\R/)
-
 # aCsvRowの中の、columnsAryの項目の配列を取得
 def pickupColumns(aCsvRow, columnsAry)
 	return columnsAry.map {|item| aCsvRow[item.to_sym]}
@@ -156,6 +143,8 @@ $guideNameColumn = ['案内人1', '案内人2', '案内人3', '案内人4', '案
 $guideTimeColumn = ['ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88']
 # ガイド料金11〜88、ガイド料金「総計」
 $guideFeeColumn = ['ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88']
+
+## -- チェック用 --
 # ガイド名が入ってないところは、(ガイド時間、)ガイド料金入ってないことを確かめる
 def feeCheck(aCsv)
 	guideNameColumn = $guideNameColumn
@@ -189,8 +178,6 @@ def feeCheck(aCsv)
 #	}
 # そこの「ガイド料金」は nil か「0時00分00秒」
 		nameNilFeeAry = nameNilAry.map {|item| guideFeeAry[item]}
-#print idx.to_s + ': '
-#pp nameNilFee2Ary
 		nameNilFeeAry.each {|item|
 			if item != '0' && !item.nil?
 				puts "#{idx}: fee is no 0"
@@ -203,17 +190,7 @@ end #def
 #feeCheck(dataCsv)
 #exit
 
-# ガイド氏名の正規化
-# 「五十嵐　和 一」->「五十嵐　和一」
-# 「[0-9]+ 〜〜」->「〜〜」
-# 「石.　英一」->「石橋　英一」
-def normalizedName(aName)
-	return aName
-#	return aName.gsub(/ /, '').gsub(/[0-9]/, '')
-#.gsub(/石.　英一/, '石橋　英一')
-end #def
-
-# ガイド氏名(正規化後)、あらかじめ取得しておいたガイド一覧の中にあるか
+# ガイド氏名、あらかじめ取得しておいたガイド一覧の中にあるか
 def guideNameCheck(aCsv, nameAry)
 	aCsv.each_with_index {|aCsvRow, idx|
 # ガイド氏名
@@ -221,14 +198,13 @@ def guideNameCheck(aCsv, nameAry)
 		guideNameAry.compact!
 #		pp guideNameAry
 		guideNameAry.each {|item|
-			unless nameAry.include?(normalizedName(item))
+			unless nameAry.include?(item)
 				puts " ^ ^ 「#{item}」 ^ ^"
 			end #unless
 		}
 	}
 end #def
 
-#pp guideNameAry
 #guideNameCheck(dataCsv, guideNameAry)
 #exit
 
