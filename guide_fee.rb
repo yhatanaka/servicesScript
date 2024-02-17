@@ -349,12 +349,13 @@ if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
 
-
+fromDate = '2023/02/01'
+toDate = '2024/01/31'
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 if ARGV.include?('guide_fee')
 	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
-#	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: '2024/01/31'))).to_csv
-#	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: '2024/01/31')).to_csv
+#	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
+#	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
 end #if
 
 =begin
