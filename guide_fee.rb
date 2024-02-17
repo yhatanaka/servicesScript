@@ -438,7 +438,7 @@ def addNumInThisGuide(aTable)
 		end #if
 	}
 	addHeaders = aTable.headers
-#	addHeaders << :num_in_this_guide
+	addHeaders << :num_in_this_guide
 	table = CSV::Table.new([], headers: addHeaders)
 	guideHash.each {|guideName, guideAry|
 		count = 1
