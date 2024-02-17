@@ -8,7 +8,7 @@ Encoding.default_external = "UTF-8"
 # test: 
 # base: 案件を出力 → 保存
 # guide_check: ガイド人数・従事時間・ガイド料の各項目数が同じか
-# guide_name: 明細を出力するガイド一覧を出力 → 保存
+# guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
@@ -333,7 +333,7 @@ end #def
 #guideNameCheck(dataCsv, guideNameAry)
 #exit
 
-# 個数チェック
+# guide_check: 入力されているガイド人数と従事時間、金額の人数が同じか
 def guidesHashCountCheck(aCsv)
 	count = 0
 	aCsv.each_with_index {|aCsvRow, idx|
@@ -428,6 +428,31 @@ def getGuides(aCsv)
 	return table
 end #def
 
+# guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
+def getGuideNameList(aTable)
+	guideHash = {}
+	aTable.each {|aRow|
+		if guideHash[aRow[:name]].nil?
+			guideHash[aRow[:name]] = [aRow]
+		else
+			guideHash[aRow[:name]] << aRow
+		end #if
+	}
+	addHeaders = aTable.headers
+	addHeaders << :num_in_this_guide
+	table = CSV::Table.new([], headers: addHeaders)
+	guideHash.each {|guideName, guideAry|
+		count = 1
+		guideAry.each {|item|
+			item[:num_in_this_guide] = count
+			table << item
+			count += 1
+		}
+	}
+	return table
+end #def
+
+# guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 def addNumInThisGuide(aTable)
 	guideHash = {}
 	aTable.each {|aRow|
@@ -457,14 +482,14 @@ dataCsv = coupon(payment(allCsv3))
 #dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base1.csv'
 #dataCsv = CSV.read(dataFile, headers: true)
 
-# guid_teste: 入力されているガイド人数と従事時間、金額の人数が同じか
+# guide_check: 入力されているガイド人数と従事時間、金額の人数が同じか
 if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
 
-# guide_name: 明細を出力するガイド一覧を出力 → 保存
+# guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
 if ARGV.include?('guide_name')
-	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
+	puts getGuideNameList(getGuides(dataCsv)).to_csv
 end #if
 
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
