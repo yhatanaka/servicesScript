@@ -234,94 +234,15 @@ def makeColumnAryFlat(aCsv, columnName)
 end #def
 
 # ガイド一覧
-#guideFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/2024-01-05_guide_utf8.csv'
-#guideCsv = CSV.read(guideFile, headers: true)
+baseDir = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/'
+guideNameFileName = 'guideName.csv'
+guideFile = baseDir + guideNameFileName
+guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converter)
+
+#content = guideCsv.by_col.
 # ガイド氏名の配列 重複あるので、uniq
 #print makeColumnAryFlat(guideCsv, '案内人氏名').uniq.join("\n").chomp
 #exit
-
-content = <<EOS
-阿部　一男
-五十嵐　和一
-池田　克彦
-伊藤　良孝
-大江　進
-大野木　佳代子
-小松　和彦
-小松　礼子
-今野　幸男
-佐々木　堅士
-佐々木　昌喜
-須田　祐司
-髙橋　治
-戸田　久一
-畠中　裕之
-樋口　信義
-豊後　富也
-森　寛
-渡部　進
-石垣　達也
-伊藤　留美子
-齊藤　淨
-佐藤　りつ
-茂野　正信
-早川　恵
-松本　恭博
-渡邉　均
-石澤　宏基
-奥山　和子
-柴田　香菜子
-菅原　重明
-林　晶
-守屋　裕孝
-横山　博
-今井　貴恵
-大滝　宗徳
-小松　剛
-齋藤　美由紀
-繁田　久美子
-相馬　元明
-三浦　将人
-佐藤　正俊
-佐藤　幸也
-相馬　孝一
-羽山　みち子
-森　康彰
-池田　朱美
-遠田　眞澄
-佐々木　盾
-土岐田　勇
-三浦　成子
-梶原　有希子
-太田　良行
-保科　恵一
-一関　敦子
-加川　正夫
-齋藤　智也
-石橋　英一
-菊地　美栄子
-小嶋　真紀子
-小嶋　裕
-佐々木　英樹
-澁谷　智子
-堀　律子
-正木　博美
-三浦　敦子
-阿部　清生
-伊東　温子
-伊藤　良明
-工藤　純
-佐藤　眞由子
-鈴木　義明
-須田　正雄
-須藤　健一
-髙岸　康雄
-松本　小三郎
-佐藤　クリストファ
-山科　みどり
-新井　真知子
-EOS
-
 # 石𣘺　英一
 #guideNameAry = content.chomp.gsub(/𣘺/, '橋').split(/\R/)
 guideNameAry = content.chomp.split(/\R/)
@@ -485,7 +406,10 @@ end #def
 
 # 各案件、ガイド(氏名、時間、料金)取得
 def getGuides(aCsv)
-	table = CSV::Table.new([], headers: [:name, :time, :fee, :tourID, :date, :payment, :coupon, :charge])
+	headersBaseAry = [:name, :time, :fee]
+	headersAddAry = [:tourID, :date, :payment, :coupon, :charge]
+	headersAry = headersBaseAry + headersAddAry
+	table = CSV::Table.new([], headers: headersAry)
 	aCsv.each_with_index {|aCsvRow, idx|
 		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
 		guidesTimeAry = pickupColumns(aCsvRow, $guideTimeColumn)
@@ -494,6 +418,7 @@ def getGuides(aCsv)
 		getGuidesHash(guidesNameAry, guidesTimeAry, guidesFeeAry).each {|item|
 			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
 			dateAry = /([0-9]{4})年([0-9]{2})月([0-9]{2})日/.match(aCsvRow[:ガイド実施日2]).to_a.values_at(1,2,3).map{|item| item.to_i}
+# headersAddAry と合わせる
 			rowValues = item.values + [aCsvRow[:管理番号], dateFormat(dateAry), aCsvRow[:payment], aCsvRow[:coupon], aCharge]
 			table << CSV::Row.new(table.headers, rowValues)
 		}
@@ -505,14 +430,24 @@ end #def
 def addNumInThisGuide(aTable)
 	guideHash = {}
 	aTable.each {|aRow|
-#pp aRow[:name]
 		if guideHash[aRow[:name]].nil?
 			guideHash[aRow[:name]] = [aRow]
 		else
 			guideHash[aRow[:name]] << aRow
 		end #if
 	}
-	pp guideHash
+	addHeaders = aTable.headers
+#	addHeaders << :num_in_this_guide
+	table = CSV::Table.new([], headers: addHeaders)
+	guideHash.each {|guideName, guideAry|
+		count = 1
+		guideAry.each {|item|
+			item[:num_in_this_guide] = count
+			table << item
+			count += 1
+		}
+	}
+	return table
 end #def
 
 allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
@@ -528,8 +463,7 @@ end #if
 
 # guide: 各案件での、ガイドごとのの支払い金額
 if ARGV.include?('guide')
-#	puts getGuides(dataCsv).to_csv
-	addNumInThisGuide(getGuides(dataCsv))
+	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
 end #if
 
 =begin
