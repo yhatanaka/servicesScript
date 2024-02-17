@@ -323,6 +323,21 @@ def addNumInThisGuide(aTable)
 	return table
 end #def
 
+# 開始日、最終日を設定、その範囲のものだけ取り出す
+def byDateRange(aCsv, index:, from: nil, to: nil)
+	if !to.nil?
+		aCsv.delete_if {|aRow|
+			Date.parse(aRow[index.to_sym]) > Date.parse(to)
+		}
+	end #if
+	if !from.nil?
+		aCsv.delete_if {|aRow|
+			Date.parse(aRow[:date]) < Date.parse(from)
+		}
+	end #unless
+	return aCsv
+end #def
+
 allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
 dataCsv = coupon(payment(allCsv3))
 
@@ -338,6 +353,8 @@ end #if
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 if ARGV.include?('guide_fee')
 	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
+#	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: '2024/01/31'))).to_csv
+#	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: '2024/01/31')).to_csv
 end #if
 
 =begin
