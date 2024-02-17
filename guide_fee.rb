@@ -128,12 +128,6 @@ def makeColumnAryFlat(aCsv, columnName)
 	return returnAry
 end #def
 
-# ガイド一覧
-baseDir = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/'
-guideNameFileName = 'guideName.csv'
-guideFile = baseDir + guideNameFileName
-guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converter)
-
 # aCsvRowの中の、columnsAryの項目の配列を取得
 def pickupColumns(aCsvRow, columnsAry)
 	return columnsAry.map {|item| aCsvRow[item.to_sym]}
@@ -304,25 +298,23 @@ def getGuides(aCsv)
 end #def
 
 # guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
-def getGuideNameList(aTable)
+def getGuideNameList(aTable, guideTable)
 	guideHash = {}
 	aTable.each {|aRow|
 		if guideHash[aRow[:name]].nil?
-			guideHash[aRow[:name]] = [aRow]
+			guideHash[aRow[:name]] = 1
 		else
-			guideHash[aRow[:name]] << aRow
+			guideHash[aRow[:name]] += 1
 		end #if
 	}
-	addHeaders = aTable.headers
-	addHeaders << :num_in_this_guide
-	table = CSV::Table.new([], headers: addHeaders)
-	guideHash.each {|guideName, guideAry|
-		count = 1
-		guideAry.each {|item|
-			item[:num_in_this_guide] = count
-			table << item
-			count += 1
+	headersAry = guideTable.headers + [:count]
+	table = CSV::Table.new([], headers: headersAry)
+	guideHash.each {|guideName, count|
+		thisGuide = guideTable.select {|aGuide|
+			aGuide[:name] == guideName
 		}
+		thisGuide[0][:count] = count
+		table << thisGuide[0]
 	}
 	return table
 end #def
@@ -362,9 +354,16 @@ if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
 
+
+# ガイド一覧
+baseDir = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/'
+guideNameFileName = 'guideName.csv'
+guideFile = baseDir + guideNameFileName
+guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converter)
+
 # guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
 if ARGV.include?('guide_name')
-	puts getGuideNameList(getGuides(dataCsv)).to_csv
+	puts getGuideNameList(getGuides(dataCsv), guideCsv).to_csv
 end #if
 
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
