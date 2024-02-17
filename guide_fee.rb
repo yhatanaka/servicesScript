@@ -6,9 +6,9 @@ Encoding.default_external = "UTF-8"
 
 # usage: ruby guide_fee.rb test/base/guide
 # test: 
-# base: 案件を出力 → 保存
+# base: 案件を出力
 # guide_check: ガイド人数・従事時間・ガイド料の各項目数が同じか
-# guide_fee: ガイドごとの支払い金額明細を出力 → 保存
+# guide_fee_csv: ガイドごとの支払い金額明細をCSV出力
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
 require 'csv'
@@ -330,15 +330,17 @@ end #def
 
 # addNumInThisGuideで作ったガイドごとのHashから、csv作る
 def toCsvGuideHash(guideHash)
-# 
+# 最初のガイドの最初の案件取り出し、headers 取得
 	firstRow = guideHash[guideHash.keys[0]][0]
 	addHeaders = firstRow.headers
-# 日付順の連番
+# 出力CSV
 	table = CSV::Table.new([], headers: addHeaders)
 	guideHash.each {|name, tourAry|
-#		table << item
+		tourAry.each {|aTour|
+			table << aTour
+		}
 	}
-	return addHeaders
+	return table
 end #def
 
 # 開始日、最終日を設定、その範囲のものだけ取り出す
@@ -370,9 +372,8 @@ end #if
 fromDate = '2023/02/01'
 toDate = '2024/01/31'
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
-if ARGV.include?('guide_fee')
-	pp toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
-#	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
+if ARGV.include?('guide_fee_csv')
+	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
 end #if
