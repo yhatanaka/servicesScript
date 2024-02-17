@@ -310,24 +310,29 @@ def addNumInThisGuide(aTable)
 			guideHash[aRow[:name]] << aRow
 		end #if
 	}
-	addHeaders = aTable.headers
-# 日付順の連番
-	addHeaders << :num_in_this_guide
-	table = CSV::Table.new([], headers: addHeaders)
 	guideHash.each {|guideName, guideAry|
 		count = 1
 # 日付でソート
-		guideArySorted = guideAry.sort {|a,b|
+		guideAry.sort! {|a,b|
 			Date.parse(a[:date]) <=> Date.parse(b[:date])
 		}
 # 連番付加
-		guideArySorted.each {|item|
+		guideAry.each {|item|
 			item[:num_in_this_guide] = count
-			table << item
 			count += 1
 		}
 	}
-	return table
+	return guideHash
+end #def
+
+# addNumInThisGuideで作ったガイドごとのHashから、csv作る
+def toCsvGuideHash(guideHash)
+	addHeaders = aTable.headers
+# 日付順の連番
+	table = CSV::Table.new([], headers: addHeaders)
+	guideHash.each {|name, tourAry|
+		table << item
+	}
 end #def
 
 # 開始日、最終日を設定、その範囲のものだけ取り出す
@@ -360,7 +365,8 @@ fromDate = '2023/02/01'
 toDate = '2024/01/31'
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 if ARGV.include?('guide_fee')
-	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
+	pp addNumInThisGuide(getGuides(dataCsv))
+#	puts addNumInThisGuide(getGuides(dataCsv)).to_csv
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
 end #if
