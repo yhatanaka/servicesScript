@@ -8,7 +8,6 @@ Encoding.default_external = "UTF-8"
 # test: 
 # base: 案件を出力 → 保存
 # guide_check: ガイド人数・従事時間・ガイド料の各項目数が同じか
-# guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
@@ -297,28 +296,6 @@ def getGuides(aCsv)
 	return table
 end #def
 
-# guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
-def getGuideNameList(aTable, guideTable)
-	guideHash = {}
-	aTable.each {|aRow|
-		if guideHash[aRow[:name]].nil?
-			guideHash[aRow[:name]] = 1
-		else
-			guideHash[aRow[:name]] += 1
-		end #if
-	}
-	headersAry = guideTable.headers + [:count]
-	table = CSV::Table.new([], headers: headersAry)
-	guideHash.each {|guideName, count|
-		thisGuide = guideTable.select {|aGuide|
-			aGuide[:name] == guideName
-		}
-		thisGuide[0][:count] = count
-		table << thisGuide[0]
-	}
-	return table
-end #def
-
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 def addNumInThisGuide(aTable)
 	guideHash = {}
@@ -354,17 +331,6 @@ if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
 
-
-# ガイド一覧
-baseDir = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/'
-guideNameFileName = 'guideNameBase.csv'
-guideFile = baseDir + guideNameFileName
-guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converter)
-
-# guide_name: 明細を出力するガイド名と所属エリア一覧を出力 → 保存
-if ARGV.include?('guide_name')
-	puts getGuideNameList(getGuides(dataCsv), guideCsv).to_csv
-end #if
 
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 if ARGV.include?('guide_fee')
