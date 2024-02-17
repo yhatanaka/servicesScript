@@ -283,11 +283,13 @@ def getGuides(aCsv)
 		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
 		guidesTimeAry = pickupColumns(aCsvRow, $guideTimeColumn)
 		guidesFeeAry = pickupColumns(aCsvRow, $guideFeeColumn)
-
+# 各ガイドごとのHash
 		getGuidesHash(guidesNameAry, guidesTimeAry, guidesFeeAry).each {|item|
-			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
+# 年月日それぞれ抽出
 			dateAry = /([0-9]{4})年([0-9]{2})月([0-9]{2})日/.match(aCsvRow[:ガイド実施日2]).to_a.values_at(1,2,3).map{|item| item.to_i}
-# headersAddAry と合わせる
+# 支払い(請求)額計算。口座/現金、クーポン、当日キャンセルから。
+			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
+# 案件のデータから、必要な項目持ってきて付加。headersAddAry に合わせる
 			rowValues = item.values + [aCsvRow[:管理番号], dateFormat(dateAry), aCsvRow[:payment], aCsvRow[:coupon], aCharge]
 			table << CSV::Row.new(table.headers, rowValues)
 		}
@@ -299,6 +301,7 @@ end #def
 # guide_fee: ガイドごとの支払い金額明細を出力 → 保存
 def addNumInThisGuide(aTable)
 	guideHash = {}
+# 各ガイドごと、従事した案件のArrayをHashに。
 	aTable.each {|aRow|
 		if guideHash[aRow[:name]].nil?
 			guideHash[aRow[:name]] = [aRow]
@@ -307,13 +310,16 @@ def addNumInThisGuide(aTable)
 		end #if
 	}
 	addHeaders = aTable.headers
+# 日付順の連番
 	addHeaders << :num_in_this_guide
 	table = CSV::Table.new([], headers: addHeaders)
 	guideHash.each {|guideName, guideAry|
 		count = 1
+# 日付でソート
 		guideArySorted = guideAry.sort {|a,b|
 			Date.parse(a[:date]) <=> Date.parse(b[:date])
 		}
+# 連番付加
 		guideArySorted.each {|item|
 			item[:num_in_this_guide] = count
 			table << item
