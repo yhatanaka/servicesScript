@@ -245,7 +245,7 @@ guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converte
 #exit
 # 石𣘺　英一
 #guideNameAry = content.chomp.gsub(/𣘺/, '橋').split(/\R/)
-guideNameAry = content.chomp.split(/\R/)
+#guideNameAry = content.chomp.split(/\R/)
 
 # aCsvRowの中の、columnsAryの項目の配列を取得
 def pickupColumns(aCsvRow, columnsAry)
