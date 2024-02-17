@@ -357,7 +357,7 @@ end #if
 
 # ガイド一覧
 baseDir = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/'
-guideNameFileName = 'guideName.csv'
+guideNameFileName = 'guideNameBase.csv'
 guideFile = baseDir + guideNameFileName
 guideCsv = CSV.read(guideFile, headers: true, header_converters: header_converter)
 
