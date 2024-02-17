@@ -7,6 +7,7 @@ Encoding.default_external = "UTF-8"
 # usage: ruby guide_fee.rb test/base/guide
 # test: 
 # base: 案件を出力
+# guide_check: ガイド人数・従事時間・ガイド料の各項目数が同じか
 # guide: ガイドごとの支払い金額集計
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
@@ -411,12 +412,24 @@ end #def
 #exit
 
 # 個数チェック
-def guidesHashCountCheck(namesAry, timesAry, feesAry)
-	unless namesAry.count == timesAry.count && timesAry.count == feesAry.count
-		return :count_error
-	else
-		return :ok
-	end #unless
+def guidesHashCountCheck(aCsv)
+	count = 0
+	aCsv.each_with_index {|aCsvRow, idx|
+		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
+		guidesTimeAry = pickupColumns(aCsvRow, $guideTimeColumn)
+		guidesFeeAry = pickupColumns(aCsvRow, $guideFeeColumn)
+		unless guidesNameAry.count == guidesTimeAry.count && guidesTimeAry.count == guidesFeeAry.count
+			puts "\n\n"
+			puts "#{idx}: count_error"
+			pp guidesNameAry
+			pp guidesTimeAry
+			pp guidesFeeAry
+			puts "\n\n"
+		else
+			count += 1
+		end #unless
+		puts "#{count} row is OK."
+	}
 end #def
 
 # 従事時間の表示フォーマット
@@ -472,19 +485,11 @@ end #def
 
 # 各案件、ガイド(氏名、時間、料金)取得
 def getGuides(aCsv)
-#	allTourGuidesHashAry = []
 	table = CSV::Table.new([], headers: [:name, :time, :fee, :tourID, :date, :payment, :coupon, :charge])
 	aCsv.each_with_index {|aCsvRow, idx|
 		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
 		guidesTimeAry = pickupColumns(aCsvRow, $guideTimeColumn)
 		guidesFeeAry = pickupColumns(aCsvRow, $guideFeeColumn)
-#		if guidesHashCountCheck(guidesNameAry, guidesTimeAry, guidesFeeAry) == :count_error
-#			puts "#{idx}: count_error"
-#			pp guidesNameAry
-#			pp guidesTimeAry
-#			pp guidesFeeAry
-#			exit
-#		end #if
 
 		getGuidesHash(guidesNameAry, guidesTimeAry, guidesFeeAry).each {|item|
 			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
@@ -503,6 +508,11 @@ dataCsv = coupon(payment(allCsv3))
 
 #dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base1.csv'
 #dataCsv = CSV.read(dataFile, headers: true)
+
+# guid_teste: 入力されているガイド人数と従事時間、金額の人数が同じか
+if ARGV.include?('guide_check')
+	guidesHashCountCheck(dataCsv).to_csv
+end #if
 
 # guide: 各案件での、ガイドごとのの支払い金額
 if ARGV.include?('guide')
