@@ -361,7 +361,11 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 			aTourHash[:items][:fee] = pdfFeeFormat(aTour[:fee])
 			aTourHash[:items][:cancel] = aTour[:cancel]
 			aTourHash[:items][:payment] = aTour[:payment]
-			aTourHash[:items][:charge] = pdfFeeFormat(aTour[:charge])
+			if aTour[:charge].to_i >= 0
+				aTourHash[:items][:charge] = pdfFeeFormat(aTour[:charge])
+			else
+				aTourHash[:items][:charge_neg] = pdfFeeFormat(aTour[:charge])
+			end #if
 			contentsHash[:details] << aTourHash
 			totalPay += aTour[:charge].to_i
 			if aTour[:payment] == :口座
@@ -372,7 +376,13 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 #				puts '!!!!!!!caution!!!!!!!! no payment!!!'
 			end #if
 		}
-		contentsHash[:headers][:name_total][:items][:total] = pdfFeeFormat(totalPay)
+		if totalPay >= 0
+			contentsHash[:headers][:name_total][:items][:total] = pdfFeeFormat(totalPay)
+			contentsHash[:headers][:name_total][:items][:shiharai_seikyu] = '支払額'
+		else
+			contentsHash[:headers][:name_total][:items][:total_neg] = pdfFeeFormat(totalPay)
+			contentsHash[:headers][:name_total][:items][:shiharai_seikyu] = '請求額'
+		end #if
 		contentsHash[:headers][:name_total][:items][:allFee] = pdfFeeFormat(kouza + cash)
 		contentsHash[:headers][:name_total][:items][:kouza] = pdfFeeFormat(kouza)
 		contentsHash[:headers][:name_total][:items][:cash] = pdfFeeFormat(cash)
@@ -439,7 +449,7 @@ if ARGV.include?('guide_check')
 end #if
 
 
-feePdfTemplate = 'ガイド料.tlf'
+feePdfTemplate = 'ガイド料2.tlf'
 # guide_fee_pdf: ガイドごとの支払い金額明細をPDF出力
 if ARGV.include?('guide_fee_pdf')
 	guideListFile = 'guideName.csv'
