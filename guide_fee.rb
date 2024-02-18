@@ -329,6 +329,74 @@ def addNumInThisGuide(aTable)
 	return guideHash
 end #def
 
+# addNumInThisGuideで作ったガイドごとのHashから、PDF作る
+def toPdfGuideHash(guideHash)
+params = {
+	type: :section,
+	layout_file: 'ガイド料.tlf',
+#	layout_file: '/Users/hatanaka/Documents/test.tlf',
+	params: {
+		groups: [
+			{
+				headers: {
+					name_total: {
+						items: {
+							area: '酒田・飛島エリア',
+							name: '勅使河原　権三郎',
+							total: '¥234,560'
+						}
+					}
+				},
+				details: [
+					{
+						id: 'tours',
+						items: {
+							index: '1',
+							date: '23/10/28',
+							course: 'みちのりトラベル東北団体ツアー飛島　2泊3日の旅',
+							event: '出羽三山を歩く天空の花畑',
+							fee: '¥17,000',
+							cancel: '○',
+							payment: '口座',
+							charge: '¥15,300'
+						}
+					},
+					{
+						id: 'tours',
+						items: {
+							index: '2',
+							date: '23/12/26',
+							course: '飛島エリア ゴールデンコース+日本の渚',
+							event: '海浜ジオキャンプ2023',
+							fee: '¥15,000',
+							cancel: '○',
+							payment: '現金',
+							charge: '-¥1,500'
+						}
+					},
+					{
+						id: 'tours',
+						items: {
+							index: '88',
+							date: '23/12/30',
+							course: '獅子ヶ鼻湿原 あがりこ大王・鳥海マリモ',
+							event: 'ジパング大人の休日倶楽部B',
+							fee: '¥15,000',
+							cancel: '▲',
+							payment: '口座',
+							charge: '¥6,750'
+						}
+					}
+				]
+			}
+		]
+	}
+}
+Thinreports.generate(params, filename: 'ガイド料.pdf')
+	return params
+# ガイド料.tlf
+end #def
+
 # addNumInThisGuideで作ったガイドごとのHashから、csv作る
 def toCsvGuideHash(guideHash)
 # 最初のガイドの最初の案件取り出し、headers 取得
@@ -372,7 +440,13 @@ end #if
 
 fromDate = '2023/02/01'
 toDate = '2024/01/31'
-# guide_fee: ガイドごとの支払い金額明細を出力 → 保存
+
+# guide_fee_pdf: ガイドごとの支払い金額明細をPDF出力
+if ARGV.include?('guide_fee_pdf')
+	pp toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)))
+end #if
+
+# guide_fee_csv: ガイドごとの支払い金額明細をベタでCSV出力
 if ARGV.include?('guide_fee_csv')
 	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
