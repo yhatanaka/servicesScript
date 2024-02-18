@@ -330,11 +330,11 @@ def addNumInThisGuide(aTable)
 	return guideHash
 end #def
 
+$guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
 # addNumInThisGuideで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
 # 'GuidePDF'フォルダの中の、エリアNo.(1..4)の中にPDF作る
 def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 #	aTour = guideHash[guideHash.keys[0]][0]
-	guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
 	guideHash.each {|guideName, tourAry|
 		thisGuide = guideListCsv.select {|aGuide|
 			aGuide[:name] == guideName
@@ -346,7 +346,7 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 		contentsHash = {}
 		contentsHash[:headers] = {name_total: {}}
 		guideAreaID = thisGuide[0][:reg_area]
-		contentsHash[:headers][:name_total][:items] = {area: guideAreaHash[guideAreaID]}
+		contentsHash[:headers][:name_total][:items] = {area: $guideAreaHash[guideAreaID]}
 		contentsHash[:headers][:name_total][:items][:name] = guideName
 		contentsHash[:details] = []
 		kouza = 0
