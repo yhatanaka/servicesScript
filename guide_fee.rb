@@ -332,47 +332,53 @@ end #def
 # addNumInThisGuideで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
 # 'GuidePDF'フォルダの中の、エリアNo.(1..4)の中にPDF作る
 def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
-	aTour = guideHash[guideHash.keys[0]][0]
-	thisGuide = guideListCsv.select {|aGuide|
-		aGuide[:name] == guideHash.keys[0]
-	}
-	guideHash[guideHash.keys[0]].each {|aTour|
-		
-	}
+#	aTour = guideHash[guideHash.keys[0]][0]
 	guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
-	paramsHash2 = {}
-	paramsHash2[:type] = :section
-	paramsHash2[:layout_file] = pdfTemplate
-	paramsHash3 = {}
-	contentsHash = {}
-	contentsHash[:headers] = {name_total: {}}
-	contentsHash[:headers][:name_total][:items] = {area: guideAreaHash[thisGuide[0][:reg_area]]}
-	contentsHash[:headers][:name_total][:items][:name] = guideHash.keys[0],
-	contentsHash[:details] = []
-	#guideHash[guideHash.keys[0]].each {|guide, tourAry|
-	totalValue = 0
-	guideHash[guideHash.keys[0]].each {|aTour|
-		aTourHash = {id: 'tours', items: {}}
-		aTourHash[:items][:index] = aTour[:num_in_this_guide]
-		aTourHash[:items][:date] = aTour[:date]
-		aTourHash[:items][:course] = aTour[:course]
-		aTourHash[:items][:event] = aTour[:event]
-		aTourHash[:items][:fee] = aTour[:fee]
-		aTourHash[:items][:cancel] = aTour[:cancel]
-		aTourHash[:items][:payment] = aTour[:payment]
-		aTourHash[:items][:charge] = aTour[:charge]
-		contentsHash[:details] << aTourHash
-		totalValue += aTour[:charge].to_i
+	guideHash.each {|guideName, tourAry|
+		thisGuide = guideListCsv.select {|aGuide|
+			aGuide[:name] == guideName
+		}
+		paramsHash = {}
+		paramsHash[:type] = :section
+		paramsHash[:layout_file] = pdfTemplate
+		paramsHash2 = {}
+		contentsHash = {}
+		contentsHash[:headers] = {name_total: {}}
+		guideAreaID = thisGuide[0][:reg_area]
+		contentsHash[:headers][:name_total][:items] = {area: guideAreaHash[guideAreaID]}
+		contentsHash[:headers][:name_total][:items][:name] = guideName
+		contentsHash[:details] = []
+		totalValue = 0
+		tourAry.each {|aTour|
+			aTourHash = {id: 'tours', items: {}}
+			aTourHash[:items][:index] = aTour[:num_in_this_guide]
+			aTourHash[:items][:date] = aTour[:date]
+			aTourHash[:items][:course] = aTour[:course]
+			aTourHash[:items][:event] = aTour[:event]
+			aTourHash[:items][:fee] = pdfFeeFormat(aTour[:fee])
+			aTourHash[:items][:cancel] = aTour[:cancel]
+			aTourHash[:items][:payment] = aTour[:payment]
+			aTourHash[:items][:charge] = pdfFeeFormat(aTour[:charge])
+			contentsHash[:details] << aTourHash
+			totalValue += aTour[:charge].to_i
+		}
+		contentsHash[:headers][:name_total][:items][:total] = pdfFeeFormat(totalValue)
+		groupsAry = [contentsHash]
+		paramsHash2[:groups] = groupsAry
+		paramsHash[:params] = paramsHash2
+		Thinreports.generate(paramsHash, filename: "GuidePDF/#{guideAreaID}/#{guideName}.pdf")
 	}
-	contentsHash[:headers][:name_total][:items][:total] = totalValue
-	groupsAry = [contentsHash]
-	paramsHash3[:groups] = groupsAry
-	paramsHash2[:params] = paramsHash3
-	Thinreports.generate(paramsHash2, filename: "GuidePDF/#{thisGuide[0][:reg_area]}/#{guideHash.keys[0]}.pdf")
-#	pp paramsHash2
-#	pp paramsHash
 end #def
 
+# 金額を3桁区切りで¥(と負数ではその前にマイナス)つけて返す
+def pdfFeeFormat(valueString)
+	sign = '¥'
+	if valueString.to_i < 0
+		valueString = valueString*(-1)
+		sign = '-¥'
+	end #if
+	return sign + valueString.to_s.reverse.scan(/.{1,3}/).join(",").reverse
+end #def
 
 # addNumInThisGuideで作ったガイドごとのHashから、csv作る
 def toCsvGuideHash(guideHash)
