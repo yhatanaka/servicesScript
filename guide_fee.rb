@@ -8,7 +8,7 @@ Encoding.default_external = "UTF-8"
 # test: 
 # base: 案件を出力
 # guide_check: ガイド人数・従事時間・ガイド料の各項目数が同じか
-# guide_fee_csv: ガイドごとの支払い金額明細をCSV出力
+# guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
 require 'csv'
@@ -448,8 +448,8 @@ if ARGV.include?('guide_fee_pdf')
 	toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)), allGuideListCsv, feePdfTemplate)
 end #if
 
-# guide_fee_csv: ガイドごとの支払い金額明細をベタでCSV出力
-if ARGV.include?('guide_fee_csv')
+# guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
+if ARGV.include?('guide_fee_flat_csv')
 	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
