@@ -371,46 +371,6 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 	Thinreports.generate(paramsHash2, filename: "GuidePDF/#{thisGuide[0][:reg_area]}/#{guideHash.keys[0]}.pdf")
 #	pp paramsHash2
 #	pp paramsHash
-# ガイド料.tlf
-=begin
-paramsHash = {
-	type: :section,
-	layout_file: pdfTemplate,
-# paramsHash3
-	params: {
-# groupsAry
-		groups: [
-# contentsHash
-			{
-				headers: {
-					name_total: {
-						items: {
-							area: guideAreaHash[thisGuide[0][:reg_area]],
-							name: guideHash.keys[0],
-							total: 'test'
-						}
-					}
-				},
-				details: [
-					{
-						id: 'tours',
-						items: {
-							index: aTour[:num_in_this_guide],
-							date: aTour[:date],
-							course: aTour[:course],
-							event: aTour[:event],
-							fee: aTour[:fee],
-							cancel: aTour[:cancel],
-							payment: aTour[:payment],
-							charge: aTour[:charge]
-						}
-					}
-				]
-			}
-		]
-	}
-}
-=end
 end #def
 
 
@@ -476,5 +436,41 @@ if ARGV.include?('guide_fee_csv')
 end #if
 
 =begin
-
+paramsHash = {
+	type: :section,
+	layout_file: pdfTemplate,
+# paramsHash3
+	params: {
+# groupsAry
+		groups: [
+# contentsHash
+			{
+				headers: {
+					name_total: {
+						items: {
+							area: guideAreaHash[thisGuide[0][:reg_area]],
+							name: guideHash.keys[0],
+							total: 'test'
+						}
+					}
+				},
+				details: [
+					{
+						id: 'tours',
+						items: {
+							index: aTour[:num_in_this_guide],
+							date: aTour[:date],
+							course: aTour[:course],
+							event: aTour[:event],
+							fee: aTour[:fee],
+							cancel: aTour[:cancel],
+							payment: aTour[:payment],
+							charge: aTour[:charge]
+						}
+					}
+				]
+			}
+		]
+	}
+}
 =end
