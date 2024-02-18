@@ -13,6 +13,7 @@ Encoding.default_external = "UTF-8"
 
 require 'csv'
 require 'pp'
+require 'thinreports'
 
 inputFile = ARGV.shift
 inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
