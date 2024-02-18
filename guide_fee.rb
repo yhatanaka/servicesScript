@@ -81,11 +81,12 @@ def selectCsvColumn3(aCsv,columnsAry)
 	return aCsv
 end #def
 
-# '支払い' 優先、nilなら'支払い方法'
+# '支払い' 優先、nilなら'支払い方法' ← なし
 #「口座振替」「現金払い」の表記を統一
 def payment(aCsv)
 	aCsv.each {|aCsvRow|
-		payment = aCsvRow[:支払い] || aCsvRow[:支払い方法]
+		payment = aCsvRow[:支払い方法]
+#		payment = aCsvRow[:支払い] || aCsvRow[:支払い方法]
 		unless payment.nil?
 			if payment.match?(/口座.*|.*振込.*/)
 				payment = :口座
@@ -410,8 +411,11 @@ def byDateRange(aCsv, index:, from: nil, to: nil)
 	return aCsv
 end #def
 
+fromDate = '2023/02/01'
+toDate = '2024/01/31'
+
 allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
-dataCsv = coupon(payment(allCsv3))
+dataCsv = byDateRange(coupon(payment(allCsv3)), index: 'ガイド実施日', to: toDate)
 
 #dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base1.csv'
 #dataCsv = CSV.read(dataFile, headers: true)
@@ -420,9 +424,6 @@ dataCsv = coupon(payment(allCsv3))
 if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
-
-fromDate = '2023/02/01'
-toDate = '2024/01/31'
 
 
 feePdfTemplate = 'ガイド料.tlf'
