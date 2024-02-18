@@ -332,49 +332,83 @@ end #def
 # addNumInThisGuideで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
 # 'GuidePDF'フォルダの中の、エリアNo.(1..4)の中にPDF作る
 def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
-#	guideHash.each {|guide, tourAry|
 aTour = guideHash[guideHash.keys[0]][0]
 thisGuide = guideListCsv.select {|aGuide|
 	aGuide[:name] == guideHash.keys[0]
 }
+guideHash[guideHash.keys[0]].each {|aTour|
+	
+}
 guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
-	params = {
-		type: :section,
-		layout_file: pdfTemplate,
-		params: {
-			groups: [
-				{
-					headers: {
-						name_total: {
-							items: {
-								area: guideAreaHash[thisGuide[0][:reg_area]],
+paramsHash2 = {}
+paramsHash2[:type] = :section
+paramsHash2[:layout_file] = pdfTemplate
+paramsHash3 = {}
+contentsHash = {}
+contentsHash[:headers] = {name_total: {}}
+contentsHash[:headers][:name_total][:items] = {area: guideAreaHash[thisGuide[0][:reg_area]],
 								name: guideHash.keys[0],
-								total: 'test'
-							}
+								total: 'test'}
+contentsHash[:details] = []
+#guideHash[guideHash.keys[0]].each {|guide, tourAry|
+#	
+#}
+aTourHash = {id: 'tours', items: {}}
+aTourHash[:items][:index] = aTour[:num_in_this_guide]
+aTourHash[:items][:date] = aTour[:date]
+aTourHash[:items][:course] = aTour[:course]
+aTourHash[:items][:event] = aTour[:event]
+aTourHash[:items][:fee] = aTour[:fee]
+aTourHash[:items][:cancel] = aTour[:cancel]
+aTourHash[:items][:payment] = aTour[:payment]
+aTourHash[:items][:charge] = aTour[:charge]
+contentsHash[:details] << aTourHash
+groupsAry = [contentsHash]
+paramsHash3[:groups] = groupsAry
+paramsHash2[:params] = paramsHash3
+=begin
+paramsHash = {
+	type: :section,
+	layout_file: pdfTemplate,
+# paramsHash3
+	params: {
+# groupsAry
+		groups: [
+# contentsHash
+			{
+				headers: {
+					name_total: {
+						items: {
+							area: guideAreaHash[thisGuide[0][:reg_area]],
+							name: guideHash.keys[0],
+							total: 'test'
 						}
-					},
-					details: [
-						{
-							id: 'tours',
-							items: {
-								index: aTour[:num_in_this_guide],
-								date: aTour[:date],
-								course: aTour[:course],
-								event: aTour[:event],
-								fee: aTour[:fee],
-								cancel: aTour[:cancel],
-								payment: aTour[:payment],
-								charge: aTour[:charge]
-							}
+					}
+				},
+				details: [
+					{
+						id: 'tours',
+						items: {
+							index: aTour[:num_in_this_guide],
+							date: aTour[:date],
+							course: aTour[:course],
+							event: aTour[:event],
+							fee: aTour[:fee],
+							cancel: aTour[:cancel],
+							payment: aTour[:payment],
+							charge: aTour[:charge]
 						}
-					]
-				}
-			]
-		}
+					}
+				]
+			}
+		]
 	}
+}
+=end
 #	}
-	Thinreports.generate(params, filename: "GuidePDF/#{thisGuide[0][:reg_area]}/#{guideHash.keys[0]}.pdf")
-#	pp 'test'
+	Thinreports.generate(paramsHash2, filename: "GuidePDF/#{thisGuide[0][:reg_area]}/#{guideHash.keys[0]}.pdf")
+#	pp paramsHash2
+#	pp paramsHash
 # ガイド料.tlf
 end #def
 
