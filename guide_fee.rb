@@ -349,7 +349,9 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 		contentsHash[:headers][:name_total][:items] = {area: guideAreaHash[guideAreaID]}
 		contentsHash[:headers][:name_total][:items][:name] = guideName
 		contentsHash[:details] = []
-		totalValue = 0
+		kouza = 0
+		cash = 0
+		totalPay = 0
 		tourAry.each {|aTour|
 			aTourHash = {id: 'tours', items: {}}
 			aTourHash[:items][:index] = aTour[:num_in_this_guide]
@@ -361,9 +363,20 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 			aTourHash[:items][:payment] = aTour[:payment]
 			aTourHash[:items][:charge] = pdfFeeFormat(aTour[:charge])
 			contentsHash[:details] << aTourHash
-			totalValue += aTour[:charge].to_i
+			totalPay += aTour[:charge].to_i
+			if aTour[:payment] == :口座
+				kouza += aTour[:fee]
+			elsif aTour[:payment] == :現金
+				cash += aTour[:fee]
+			else
+#				puts '!!!!!!!caution!!!!!!!! no payment!!!'
+			end #if
 		}
-		contentsHash[:headers][:name_total][:items][:total] = pdfFeeFormat(totalValue)
+		contentsHash[:headers][:name_total][:items][:total] = pdfFeeFormat(totalPay)
+		contentsHash[:headers][:name_total][:items][:allFee] = pdfFeeFormat(kouza + cash)
+		contentsHash[:headers][:name_total][:items][:kouza] = pdfFeeFormat(kouza)
+		contentsHash[:headers][:name_total][:items][:cash] = pdfFeeFormat(cash)
+		contentsHash[:headers][:name_total][:items][:toll] = pdfFeeFormat((kouza + cash)/10)
 		groupsAry = [contentsHash]
 		paramsHash2[:groups] = groupsAry
 		paramsHash[:params] = paramsHash2
