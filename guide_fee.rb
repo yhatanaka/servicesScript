@@ -329,48 +329,55 @@ def addNumInThisGuide(aTable)
 	return guideHash
 end #def
 
-# addNumInThisGuideで作ったガイドごとのHashから、PDF作る
-def toPdfGuideHash(guideHash)
-	guideHash.each {|guide, tourAry|
-		params = {
-			type: :section,
-			layout_file: 'ガイド料.tlf',
-			params: {
-				groups: [
-					{
-						headers: {
-							name_total: {
-								items: {
-									area: '酒田・飛島エリア',
-									name: guide,
-									total: '¥234,560'
-								}
+# addNumInThisGuideで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
+# 'GuidePDF'フォルダの中の、エリアNo.(1..4)の中にPDF作る
+def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
+#	guideHash.each {|guide, tourAry|
+aTour = guideHash[guideHash.keys[0]][0]
+thisGuide = guideListCsv.select {|aGuide|
+	aGuide[:name] == guideHash.keys[0]
+}
+guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
+	params = {
+		type: :section,
+		layout_file: pdfTemplate,
+		params: {
+			groups: [
+				{
+					headers: {
+						name_total: {
+							items: {
+								area: guideAreaHash[thisGuide[0][:reg_area]],
+								name: guideHash.keys[0],
+								total: 'test'
 							}
-						},
-						details: [
-							{
-								id: 'tours',
-								items: {
-									index: '1',
-									date: '23/10/28',
-									course: 'みちのりトラベル東北団体ツアー飛島　2泊3日の旅',
-									event: '出羽三山を歩く天空の花畑',
-									fee: '¥17,000',
-									cancel: '○',
-									payment: '口座',
-									charge: '¥15,300'
-								}
+						}
+					},
+					details: [
+						{
+							id: 'tours',
+							items: {
+								index: aTour[:num_in_this_guide],
+								date: aTour[:date],
+								course: aTour[:course],
+								event: aTour[:event],
+								fee: aTour[:fee],
+								cancel: aTour[:cancel],
+								payment: aTour[:payment],
+								charge: aTour[:charge]
 							}
-						]
-					}
-				]
-			}
+						}
+					]
+				}
+			]
 		}
 	}
-#	Thinreports.generate(params, filename: 'ガイド料.pdf')
-#	return params
+#	}
+	Thinreports.generate(params, filename: "GuidePDF/#{thisGuide[0][:reg_area]}/#{guideHash.keys[0]}.pdf")
+#	pp 'test'
 # ガイド料.tlf
 end #def
+
 
 # addNumInThisGuideで作ったガイドごとのHashから、csv作る
 def toCsvGuideHash(guideHash)
@@ -416,9 +423,14 @@ end #if
 fromDate = '2023/02/01'
 toDate = '2024/01/31'
 
+
+feePdfTemplate = 'ガイド料.tlf'
 # guide_fee_pdf: ガイドごとの支払い金額明細をPDF出力
 if ARGV.include?('guide_fee_pdf')
-	toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)))
+	guideListFile = 'guideName.csv'
+	allGuideListCsv = CSV.read(guideListFile, headers: true, skip_blanks: true, header_converters: header_converter)
+#pp allGuideListCsv
+	toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)), allGuideListCsv, feePdfTemplate)
 end #if
 
 # guide_fee_csv: ガイドごとの支払い金額明細をベタでCSV出力
