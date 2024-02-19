@@ -364,6 +364,7 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 			aTourHash[:items][:fee] = pdfFeeFormat(aTour[:fee])
 			aTourHash[:items][:cancel] = aTour[:cancel]
 			aTourHash[:items][:payment] = aTour[:payment]
+			aTourHash[:items][:area_id] = $guideAreaHash[aTour[:area]]
 			if aTour[:charge].to_i >= 0
 				aTourHash[:items][:charge] = pdfFeeFormat(aTour[:charge])
 			else

@@ -1089,6 +1089,40 @@
             "line-height-ratio": "",
             "line-height": 13.2
           }
+        },
+        {
+          "type": "text-block",
+          "id": "area_id",
+          "x": 451.55,
+          "y": 5.79,
+          "width": 20,
+          "height": 8.46,
+          "description": "",
+          "reference-id": "",
+          "value": "",
+          "multiple-line": true,
+          "display": true,
+          "format": {
+            "base": "",
+            "type": ""
+          },
+          "follow-stretch": "none",
+          "affect-bottom-margin": true,
+          "style": {
+            "font-family": [
+              "Helvetica"
+            ],
+            "color": "#000000",
+            "font-style": [],
+            "text-align": "left",
+            "vertical-align": "top",
+            "letter-spacing": "",
+            "overflow": "truncate",
+            "word-wrap": "break-word",
+            "font-size": 6,
+            "line-height-ratio": "",
+            "line-height": 6.6
+          }
         }
       ]
     },
