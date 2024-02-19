@@ -452,7 +452,7 @@ if ARGV.include?('guide_check')
 end #if
 
 
-feePdfTemplate = 'ガイド料2.tlf'
+feePdfTemplate = '/Users/hatanaka/Documents/servicesScript/ガイド料2.tlf'
 # guide_fee_pdf: ガイドごとの支払い金額明細をPDF出力
 if ARGV.include?('guide_fee_pdf')
 	guideListFile = 'guideName.csv'
