@@ -280,7 +280,7 @@ end #def
 def getGuides(aCsv)
 	headersBaseAry = [:name, :time, :fee]
 # 追加分 :tourID(管理番号), :date,  :course(), :event(), :cancel(), :payment, :coupon, :charge
-	headersAddAry = [:tourID, :date, :course, :event, :cancel, :payment, :coupon, :charge]
+	headersAddAry = [:tourID, :area, :date, :course, :event, :cancel, :payment, :coupon, :charge]
 	headersAry = headersBaseAry + headersAddAry
 	table = CSV::Table.new([], headers: headersAry)
 	aCsv.each_with_index {|aCsvRow, idx|
@@ -294,7 +294,7 @@ def getGuides(aCsv)
 # 支払い(請求)額計算。口座/現金、クーポン、当日キャンセルから。
 			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
 # 案件のデータから、必要な項目持ってきて付加。headersAddAry に合わせる
-			rowValues = item.values + [aCsvRow[:管理番号], dateFormat(dateAry), aCsvRow[:モデルコース], aCsvRow[:催し等], aCsvRow[:キャンセル], aCsvRow[:payment], aCsvRow[:coupon], aCharge]
+			rowValues = item.values + [aCsvRow[:管理番号], aCsvRow[:エリア], dateFormat(dateAry), aCsvRow[:モデルコース], aCsvRow[:催し等], aCsvRow[:キャンセル], aCsvRow[:payment], aCsvRow[:coupon], aCharge]
 			table << CSV::Row.new(table.headers, rowValues)
 		}
 
@@ -349,7 +349,7 @@ def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 		contentsHash = {}
 		contentsHash[:headers] = {name_total: {}}
 		guideAreaID = thisGuide[0][:reg_area]
-		contentsHash[:headers][:name_total][:items] = {area: $guideRegHash[guideAreaID]}
+		contentsHash[:headers][:name_total][:items] = {reg_area: $guideRegHash[guideAreaID]}
 		contentsHash[:headers][:name_total][:items][:name] = guideName
 		contentsHash[:details] = []
 		kouza = 0
