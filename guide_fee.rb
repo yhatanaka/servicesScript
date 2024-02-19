@@ -435,7 +435,7 @@ def byDateRange(aCsv, index:, from: nil, to: nil)
 end #def
 
 fromDate = '2023/02/01'
-toDate = '2024/01/31'
+toDate = '2023/12/31'
 
 allCsv3 = selectCsvColumn3(inputCsv,reqColumns)
 dataCsv = byDateRange(coupon(payment(allCsv3)), index: 'ガイド実施日', to: toDate)
