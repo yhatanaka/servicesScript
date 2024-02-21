@@ -318,8 +318,8 @@ def addNumInThisGuide(aTable)
 	guideHash.each {|guideName, guideAry|
 		count = 1
 # 日付でソート
-		guideAry.sort! {|a,b|
-			Date.parse(a[:date]) <=> Date.parse(b[:date])
+		guideAry.sort_by! {|element|
+			Date.parse(element[:date])
 		}
 # 連番付加
 		guideAry.each {|item|
@@ -334,68 +334,118 @@ end #def
 $guideRegHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
 # ガイドする5エリア
 $guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田エリア', '5' => '飛島エリア'}
+
 # addNumInThisGuideで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
 # 'GuidePDF'フォルダの中の、エリアNo.(1..4)の中にPDF作る
 def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
-#	aTour = guideHash[guideHash.keys[0]][0]
+# ガイドごと
 	guideHash.each {|guideName, tourAry|
 		thisGuide = guideListCsv.select {|aGuide|
 			aGuide[:name] == guideName
 		}
-		paramsHash = {}
-		paramsHash[:type] = :section
-		paramsHash[:layout_file] = pdfTemplate
-		paramsHash2 = {}
-		contentsHash = {}
-		contentsHash[:headers] = {name_total: {}}
 		guideAreaID = thisGuide[0][:reg_area]
-		contentsHash[:headers][:name_total][:items] = {reg_area: $guideRegHash[guideAreaID]}
-		contentsHash[:headers][:name_total][:items][:name] = guideName
-		contentsHash[:details] = []
+# 口座振込分、現金払い分、総額
 		kouza = 0
 		cash = 0
 		totalPay = 0
-		tourAry.each {|aTour|
-			aTourHash = {id: 'tours', items: {}}
-			aTourHash[:items][:index] = aTour[:num_in_this_guide]
-			aTourHash[:items][:date] = aTour[:date]
-			aTourHash[:items][:course] = aTour[:course]
-			aTourHash[:items][:event] = aTour[:event]
-			aTourHash[:items][:fee] = pdfFeeFormat(aTour[:fee])
-			aTourHash[:items][:cancel] = aTour[:cancel]
-			aTourHash[:items][:payment] = aTour[:payment]
-			aTourHash[:items][:area_id] = $guideAreaHash[aTour[:area]]
-			if aTour[:charge].to_i >= 0
-				aTourHash[:items][:charge] = pdfFeeFormat(aTour[:charge])
-			else
-				aTourHash[:items][:charge_neg] = pdfFeeFormat(aTour[:charge])
-			end #if
-			contentsHash[:details] << aTourHash
+# 個々の案件
+		toursStrcHash_by_area = tourAry.each_with_object(Hash.new { |v, k| v[k] = []}) {|aTour, areaHash|
+			areaHash[aTour[:area]] << Tour.new(aTour[:num_in_this_guide], aTour[:date], aTour[:course], aTour[:event], aTour[:cancel], aTour[:payment], aTour[:area], aTour[:fee], aTour[:charge])
 			totalPay += aTour[:charge].to_i
 			if aTour[:payment] == :口座
 				kouza += aTour[:fee]
 			elsif aTour[:payment] == :現金
 				cash += aTour[:fee]
-			else
-#				puts '!!!!!!!caution!!!!!!!! no payment!!!'
-			end #if
+			end
 		}
+# 案件の多いエリアのものから。同じなら自分の所属エリアを先に
+		toursStrcHash_by_area_sortedAry = toursStrcHash_by_area.sort_by {|key, value|
+			[-value.count, eql201(key.eql?(thisGuide[0][:reg_area]))*(-1)]
+		}
+# 全体
 		if totalPay >= 0
-			contentsHash[:headers][:name_total][:items][:total] = pdfFeeFormat(totalPay)
-			contentsHash[:headers][:name_total][:items][:shiharai_seikyu] = '支払額'
+			total_type = :total
+			shiharai_seikyu_str = '支払額'
 		else
-			contentsHash[:headers][:name_total][:items][:total_neg] = pdfFeeFormat(totalPay)
-			contentsHash[:headers][:name_total][:items][:shiharai_seikyu] = '請求額'
+			total_type = :total_neg
+			shiharai_seikyu_str = '請求額'
 		end #if
-		contentsHash[:headers][:name_total][:items][:allFee] = pdfFeeFormat(kouza + cash)
-		contentsHash[:headers][:name_total][:items][:kouza] = pdfFeeFormat(kouza)
-		contentsHash[:headers][:name_total][:items][:cash] = pdfFeeFormat(cash)
-		contentsHash[:headers][:name_total][:items][:toll] = pdfFeeFormat((kouza + cash)/10)
-		groupsAry = [contentsHash]
-		paramsHash2[:groups] = groupsAry
-		paramsHash[:params] = paramsHash2
-		Thinreports.generate(paramsHash, filename: "GuidePDF/#{guideAreaID}/#{guideName}.pdf")
+
+		paramsHash_strct = {
+			type: :section,
+			layout_file: pdfTemplate,
+			params: {
+				groups: [
+					{
+						headers: {
+							name_total: {
+								items: {
+									reg_area: $guideRegHash[thisGuide[0][:reg_area]],
+									name: guideName,
+									shiharai_seikyu: shiharai_seikyu_str,
+									total_type => pdfFeeFormat(totalPay),
+									allFee: pdfFeeFormat(kouza + cash),
+									kouza: pdfFeeFormat(kouza),
+									cash: pdfFeeFormat(cash),
+									toll: pdfFeeFormat((kouza + cash)/10)
+								}
+							}
+						},
+						details: build_details(toursStrcHash_by_area_sortedAry)
+					}
+				]
+			}
+		}
+		Thinreports.generate(paramsHash_strct, filename: "GuidePDF/#{guideAreaID}/#{guideName}.pdf")
 	}
+end #def
+
+def eql201(boolean)
+	if boolean
+		return 1
+	else
+		return 0
+	end
+end #def
+
+# [['area_1', [tour1, tour2]], [['area_2', [tour1, tour2]], ...]
+def build_details(aryOfToursStrcAry)
+	details = []
+	count = 0
+	aryOfToursStrcAry.each {|area_id, tour_by_area_Ary|
+		area_name_section = {
+			id: 'area_name_title',
+			items: {
+				area_name: $guideAreaHash[area_id]
+			}
+		}
+		details << area_name_section
+		tour_by_area_Ary.each {|aTour|
+			if aTour[:charge].to_i >= 0
+				charge_type = :charge
+			else
+				charge_type = :charge_neg
+			end #if
+			count += 1
+			aDetail = {
+				id: 'tours',
+				items: {
+					area_id: aTour[:area_id],
+					area_name: $guideAreaHash[aTour[:area_id]],
+					index: count,
+					date: aTour[:date],
+					course: aTour[:course],
+					event: aTour[:event],
+					fee: pdfFeeFormat(aTour[:fee]),
+					cancel: aTour[:cancel],
+					payment: aTour[:payment],
+					charge_type => pdfFeeFormat(aTour[:charge])
+				}
+			}
+			details << aDetail
+		}
+	}
+	return details
 end #def
 
 # 金額を3桁区切りで¥(と負数ではその前にマイナス)つけて返す
@@ -452,6 +502,8 @@ if ARGV.include?('guide_check')
 	guidesHashCountCheck(dataCsv).to_csv
 end #if
 
+Tour = Struct.new(:index, :date, :course, :event, :cancel, :payment, :area_id, :fee, :charge)
+#Guide = Struct.new(:name, :reg_area_id, :tours)
 
 feePdfTemplate = '/Users/hatanaka/Documents/servicesScript/ガイド料2.tlf'
 # guide_fee_pdf: ガイドごとの支払い金額明細をPDF出力
@@ -470,41 +522,4 @@ if ARGV.include?('guide_fee_flat_csv')
 end #if
 
 =begin
-paramsHash = {
-	type: :section,
-	layout_file: pdfTemplate,
-# paramsHash3
-	params: {
-# groupsAry
-		groups: [
-# contentsHash
-			{
-				headers: {
-					name_total: {
-						items: {
-							area: guideShozokuHash[thisGuide[0][:reg_area]],
-							name: guideHash.keys[0],
-							total: 'test'
-						}
-					}
-				},
-				details: [
-					{
-						id: 'tours',
-						items: {
-							index: aTour[:num_in_this_guide],
-							date: aTour[:date],
-							course: aTour[:course],
-							event: aTour[:event],
-							fee: aTour[:fee],
-							cancel: aTour[:cancel],
-							payment: aTour[:payment],
-							charge: aTour[:charge]
-						}
-					}
-				]
-			}
-		]
-	}
-}
 =end
