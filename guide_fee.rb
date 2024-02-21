@@ -81,6 +81,19 @@ def selectCsvColumn(aCsv,columnsAry)
 	return aCsv
 end #def
 
+#必要な列だけ、催行(⚪︎)・当日キャンセル(▲)・キャンセル(△)取り出す。エリア受付手当計算用
+def selectCsvColumn4area(aCsv,columnsAry)
+	aCsv.by_col!
+	aCsv.delete_if {|columnName, values|
+		!columnsAry.include?(columnName.to_s)
+	}
+	aCsv.by_row!
+	aCsv.delete_if {|aCsvRow|
+		aCsvRow[:キャンセル] != '〇' && aCsvRow[:キャンセル] != '▲' && aCsvRow[:キャンセル] != '△'
+	}
+	return aCsv
+end #def
+
 # '支払い' 優先、nilなら'支払い方法' ← なし
 #「口座振替」「現金払い」の表記を統一
 def payment(aCsv)
@@ -520,6 +533,19 @@ if ARGV.include?('guide_fee_flat_csv')
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
 end #if
+
+# 各エリアごとに、催行・当日キャンセル・キャンセルの件数まとめる
+def areaCountCsv(aCsv)
+	return aCsv
+end #def
+
+reqColumns_area = ['管理番号', 'エリア', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', 'ガイド完了', 'キャンセル', 'クーポン', 'ガイド料金総計', 'ガイド実施日2']
+
+# guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
+if ARGV.include?('area_count_csv')
+	pp areaCountCsv(byDateRange(selectCsvColumn4area(inputCsv,reqColumns_area), index: 'ガイド実施日', to: toDate))
+end #if
+
 
 =begin
 =end
