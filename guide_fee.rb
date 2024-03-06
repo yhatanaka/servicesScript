@@ -124,6 +124,26 @@ class Guide_fee
 		}
 	end #def
 
+# guide_check: 入力されているガイド人数と従事時間、金額の人数が同じか
+	def guidesHashCountCheck
+		count = 0
+		baseCsv.each_with_index {|aCsvRow, idx|
+			guidesNameAry = pickupColumns(aCsvRow, @guideNameColumn)
+			guidesTimeAry = pickupColumns(aCsvRow, @guideTimeColumn)
+			guidesFeeAry = pickupColumns(aCsvRow, @guideFeeColumn)
+			unless guidesNameAry.count == guidesTimeAry.count && guidesTimeAry.count == guidesFeeAry.count
+				puts "\n\n"
+				puts "#{idx}: count_error"
+				pp guidesNameAry
+				pp guidesTimeAry
+				pp guidesFeeAry
+				puts "\n\n"
+			else
+				count += 1
+			end #unless
+			puts "#{count} row is OK."
+		}
+	end #def
 
 
 # 出力
@@ -190,9 +210,30 @@ class Guide_fee
 		return coupon(payment(selectCsvColumn))
 	end
 	
+
+# 案件の、ガイド名・時間・料金の各配列、ガイドごと{氏名, 時間, 料金}のハッシュの配列で返す
+	def getGuidesHash(namesAry, timesAry, feesAry)
+		guidesHashAry = []
+		namesAry.each_with_index {|aName, idx|
+# ガイド名入ってるところを…
+			unless aName.nil?
+				guideTimeHMSAry = /([0-9]+)時([0-9]+)分([0-9]+)秒/.match(timesAry[idx]).to_a.values_at(1,2,3).map{|item| item.to_i}
+				guideFee = feesAry[idx].to_i
+				guidesHashAry << {:name => aName, :time => timeRangeFormat(guideTimeHMSAry), :fee => guideFee}
+			end #unless
+		}
+		return guidesHashAry
+	end #def
+
 # aCsvRowの中の、columnsAryの項目の配列を取得
 	def pickupColumns(aCsvRow, columnsAry)
 		return columnsAry.map {|item| aCsvRow[item.to_sym]}
+	end #def
+
+# 従事時間の表示フォーマット
+	def timeRangeFormat(hmsAry)
+		mFormat = sprintf("%02d", hmsAry[1])
+		return "#{hmsAry[0]}:#{mFormat}"
 	end #def
 
 
@@ -209,7 +250,15 @@ aGuide_fee = Guide_fee.new(inputFile)
 #aGuide_fee.feeCheck
 #guideNameAry = CSV.table('guideName.csv')[:name]
 #pp guideNameAry
-aGuide_fee.guideNameCheck(CSV.table('guideName.csv')[:name])
+#aGuide_fee.guideNameCheck(CSV.table('guideName.csv')[:name])
+aGuide_fee.guidesHashCountCheck
+# guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
+if ARGV.include?('guide_fee_flat_csv')
+	puts aGuide_fee.getGuides
+#	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
+#	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
+#	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
+end #if
 exit
 # baseCsv: 案件を出力 → 保存
 
@@ -224,46 +273,6 @@ def makeColumnAryFlat(aCsv, columnName)
 end #def
 
 
-# guide_check: 入力されているガイド人数と従事時間、金額の人数が同じか
-def guidesHashCountCheck(aCsv)
-	count = 0
-	aCsv.each_with_index {|aCsvRow, idx|
-		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
-		guidesTimeAry = pickupColumns(aCsvRow, $guideTimeColumn)
-		guidesFeeAry = pickupColumns(aCsvRow, $guideFeeColumn)
-		unless guidesNameAry.count == guidesTimeAry.count && guidesTimeAry.count == guidesFeeAry.count
-			puts "\n\n"
-			puts "#{idx}: count_error"
-			pp guidesNameAry
-			pp guidesTimeAry
-			pp guidesFeeAry
-			puts "\n\n"
-		else
-			count += 1
-		end #unless
-		puts "#{count} row is OK."
-	}
-end #def
-
-# 従事時間の表示フォーマット
-def timeRangeFormat(hmsAry)
-	mFormat = sprintf("%02d", hmsAry[1])
-	return "#{hmsAry[0]}:#{mFormat}"
-end #def
-
-# 案件の、ガイド名・時間・料金の各配列、ガイドごと{氏名, 時間, 料金}のハッシュの配列で返す
-def getGuidesHash(namesAry, timesAry, feesAry)
-	guidesHashAry = []
-	namesAry.each_with_index {|aName, idx|
-# ガイド名入ってるところを…
-		unless aName.nil?
-			guideTimeHMSAry = /([0-9]+)時([0-9]+)分([0-9]+)秒/.match(timesAry[idx]).to_a.values_at(1,2,3).map{|item| item.to_i}
-			guideFee = feesAry[idx].to_i
-			guidesHashAry << {:name => aName, :time => timeRangeFormat(guideTimeHMSAry), :fee => guideFee}
-		end #unless
-	}
-	return guidesHashAry
-end #def
 
 # ガイド料、支払い方法、クーポン から、振込額/納付手数料を計算
 def guideCharge(fee, payment, coupon, cancel)
@@ -518,10 +527,6 @@ dataCsv = byDateRange(coupon(payment(allCsv3)), index: 'ガイド実施日', to:
 #dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base1.csv'
 #dataCsv = CSV.read(dataFile, headers: true)
 
-# guide_check: 入力されているガイド人数と従事時間、金額の人数が同じか
-if ARGV.include?('guide_check')
-	guidesHashCountCheck(dataCsv).to_csv
-end #if
 
 Tour = Struct.new(:index, :date, :course, :event, :cancel, :payment, :area_id, :fee, :charge)
 #Guide = Struct.new(:name, :reg_area_id, :tours)
@@ -535,12 +540,6 @@ if ARGV.include?('guide_fee_pdf')
 	toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)), allGuideListCsv, feePdfTemplate)
 end #if
 
-# guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
-if ARGV.include?('guide_fee_flat_csv')
-	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
-#	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
-#	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
-end #if
 
 # 各エリアごとに、催行・当日キャンセル・キャンセルの件数まとめる
 def areaCountCsv(aCsv)
