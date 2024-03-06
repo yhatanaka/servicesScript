@@ -18,9 +18,12 @@ require 'thinreports'
 inputFile = ARGV.shift
 inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 
-header_converter = lambda {|h| h.to_sym}
-inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: header_converter)
 class Guide_fee
+	attr_accessor :inputCsv
+	@header_converter = lambda {|h| h.to_sym}
+	def initialize(inputFileContents)
+		@inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: @header_converter)
+	end
 ## -- チェック用 --
 	def findOverlap(aCsv)
 #重複するヘッダ項目をチェック。各項目の個数を集計し、2回以上出た項目とその回数を表示。重複回避してから処理にかかる。
@@ -45,8 +48,10 @@ class Guide_fee
 	end #def
 end #class
 # test
+aGuide_fee = Guide_fee.new(inputFileContents)
+pp aGuide_fee.inputCsv
+exit
 if ARGV.include?('test')
-	aGuide_fee = Guide_fee.new
 #	pp aGuide_fee.findOverlap(inputCsv)
 	rowsHash = {}
 	inputCsv.each_with_index {|row, idx|
