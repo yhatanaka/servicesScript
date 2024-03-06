@@ -16,12 +16,12 @@ require 'pp'
 require 'thinreports'
 
 inputFile = ARGV.shift
-inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 
 class Guide_fee
 	attr_accessor :inputCsv
 	@header_converter = lambda {|h| h.to_sym}
-	def initialize(inputFileContents)
+	def initialize(inputFile)
+		inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 		@inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: @header_converter)
 	end
 ## -- チェック用 --
@@ -48,7 +48,7 @@ class Guide_fee
 	end #def
 end #class
 # test
-aGuide_fee = Guide_fee.new(inputFileContents)
+aGuide_fee = Guide_fee.new(inputFile)
 pp aGuide_fee.inputCsv
 exit
 if ARGV.include?('test')
