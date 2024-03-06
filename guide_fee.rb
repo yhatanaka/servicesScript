@@ -20,45 +20,49 @@ inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 
 header_converter = lambda {|h| h.to_sym}
 inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: header_converter)
-
+class Guide_fee
 ## -- チェック用 --
-def findOverlap(aCsv)
+	def findOverlap(aCsv)
 #重複するヘッダ項目をチェック。各項目の個数を集計し、2回以上出た項目とその回数を表示。重複回避してから処理にかかる。
-	headersAry = aCsv.headers
-	headersHash = {}
-	headersAry.each {|item|
-		if headersHash[item].nil?
-			headersHash[item] = 1
-		else
-			headersHash[item] += 1
-		end #if
-	}
-	count = 0
-	headersHash.each {|item,value|
-		if value > 1
-			puts item + ' : ' + value.to_s + ''
-			count += 1
-		end #if
-	}
-	puts '重複項目数: ' + count.to_s
-	return headersHash
-end #def
-
+		headersAry = aCsv.headers
+		headersHash = {}
+		headersAry.each {|item|
+			if headersHash[item].nil?
+				headersHash[item] = 1
+			else
+				headersHash[item] += 1
+			end #if
+		}
+		count = 0
+		headersHash.each {|item,value|
+			if value > 1
+				puts item + ' : ' + value.to_s + ''
+				count += 1
+			end #if
+		}
+		puts '重複項目数: ' + count.to_s
+		return headersHash
+	end #def
+end #class
 # test
 if ARGV.include?('test')
-	pp findOverlap(inputCsv)
+	aGuide_fee = Guide_fee.new
+#	pp aGuide_fee.findOverlap(inputCsv)
 	rowsHash = {}
 	inputCsv.each_with_index {|row, idx|
-		if row['管理番号'] == '' || row['管理番号'].nil?
+		if row[:管理番号] == '' || row[:管理番号].nil?
 			puts "error: #{idx} index is null"
 			pp row
-		elsif rowsHash[row['管理番号']]
-			puts "error: #{idx}"
-			pp rowsHash[row['管理番号']]
+			pp ''
+		elsif rowsHash[row[:管理番号]]
+			puts "error: #{idx} already exist."
+			pp rowsHash[row[:管理番号]]
 			pp row
+			pp ''
 		else
-			rowsHash[row['管理番号']] = [idx,row]
+			rowsHash[row[:管理番号]] = [idx,row]
 		end #if
+#		pp row[:管理番号]
 	}
 	exit
 end #if
@@ -541,7 +545,7 @@ end #def
 
 reqColumns_area = ['管理番号', 'エリア', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', 'ガイド完了', 'キャンセル', 'クーポン', 'ガイド料金総計', 'ガイド実施日2']
 
-# guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
+# area_count_csv: エリアごとの受付件数出力
 if ARGV.include?('area_count_csv')
 	pp areaCountCsv(byDateRange(selectCsvColumn4area(inputCsv,reqColumns_area), index: 'ガイド実施日', to: toDate))
 end #if
