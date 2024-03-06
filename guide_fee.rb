@@ -145,13 +145,13 @@ class Guide_fee
 
 # 各案件、ガイドごと(氏名、時間、料金)取得
 # [:name, :time, :fee, :tourID(管理番号), :date,  :course(モデルコース), :event(催し等), :cancel(キャンセル), :payment, :coupon, :charge]
-	def getGuides(aCsv=baseCsv, index: nil, from: nil, to: nil)
+	def getGuides(aCsv=baseCsv, from: nil, to: nil)
 		headersBaseAry = [:name, :time, :fee]
 # 追加分 :tourID(管理番号), :date,  :course(), :event(), :cancel(), :payment, :coupon, :charge
 		headersAddAry = [:tourID, :area, :date, :course, :event, :cancel, :payment, :coupon, :charge]
 		headersAry = headersBaseAry + headersAddAry
 		table = CSV::Table.new([], headers: headersAry)
-		byDateRange(aCsv, index: index, from: from, to: to).each_with_index {|aCsvRow, idx|
+		byDateRange(aCsv, index: 'ガイド実施日', from: from, to: to).each_with_index {|aCsvRow, idx|
 			guidesNameAry = pickupColumns(aCsvRow, @guideNameColumn)
 			guidesTimeAry = pickupColumns(aCsvRow, @guideTimeColumn)
 			guidesFeeAry = pickupColumns(aCsvRow, @guideFeeColumn)
@@ -197,10 +197,10 @@ class Guide_fee
 # guide_fee: getGuidesで返ったガイド・案件ごとのtable、ガイドごとにまとめ実施日で連番付加しHashで返す
 # {ガイド1 => [案件CSV.Row_1,案件CSV.Row_2,案件CSV.Row_3, ...], ガイド2 => ...}
 # 案件CSV.Row: 
-	def thisGuideHash(aCsv=baseCsv, index: nil, from: nil, to: nil)
+	def thisGuideHash(aCsv=baseCsv, from: nil, to: nil)
 		guideHash = {}
 # 各ガイドごと、従事した案件のArrayをHashに。
-		getGuides(aCsv, index: index, from: from, to: to).each {|aRow|
+		getGuides(aCsv, from: from, to: to).each {|aRow|
 			if guideHash[aRow[:name]].nil?
 				guideHash[aRow[:name]] = [aRow]
 			else
@@ -229,7 +229,7 @@ class Guide_fee
 		addHeaders = firstRow.headers
 # 出力CSV
 		table = CSV::Table.new([], headers: addHeaders)
-		thisGuideHash(aCsv=baseCsv, index: index, from: from, to: to).each {|name, tourAry|
+		thisGuideHash(aCsv=baseCsv, from: from, to: to).each {|name, tourAry|
 			tourAry.each {|aTour|
 				table << aTour
 			}
@@ -372,7 +372,7 @@ aGuide_fee = Guide_fee.new(inputFile)
 #aGuide_fee.guidesHashCountCheck
 # guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
 toDate = '2023/12/31'
-#pp aGuide_fee.thisGuideHash(index: 'ガイド実施日', to: toDate)
+#puts aGuide_fee.toCsvGuideHash(to: toDate)
 #puts aGuide_fee.byDateRange(aGuide_fee.baseCsv, index: 'ガイド実施日', to: toDate)
 #	puts toCsvGuideHash(thisGuideHash(getGuides(dataCsv)))
 #	puts thisGuideHash(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
