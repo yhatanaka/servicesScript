@@ -110,6 +110,22 @@ class Guide_fee
 		}
 	end #def
 
+# ガイド氏名、あらかじめ取得しておいたガイド一覧の中にあるか
+	def guideNameCheck(nameAry)
+		baseCsv.each_with_index {|aCsvRow, idx|
+# ガイド氏名
+			guideNameAry = @guideNameColumn.map {|item| aCsvRow[item]}
+			guideNameAry.compact!
+			guideNameAry.each {|item|
+				unless nameAry.include?(item)
+					puts " ^ ^ 「#{item}」 ^ ^"
+				end #unless
+			}
+		}
+	end #def
+
+
+
 # 出力
 #必要な列だけ、ガイド名入ったもの・催行(⚪︎)・当日キャンセル(▲)取り出す。
 	def selectCsvColumn
@@ -190,7 +206,10 @@ aGuide_fee = Guide_fee.new(inputFile)
 #pp aGuide_fee.instance_variables
 #pp aGuide_fee.selectCsvColumn
 #pp aGuide_fee.baseCsv
-aGuide_fee.feeCheck
+#aGuide_fee.feeCheck
+#guideNameAry = CSV.table('guideName.csv')[:name]
+#pp guideNameAry
+aGuide_fee.guideNameCheck(CSV.table('guideName.csv')[:name])
 exit
 # baseCsv: 案件を出力 → 保存
 
@@ -204,28 +223,6 @@ def makeColumnAryFlat(aCsv, columnName)
 	return returnAry
 end #def
 
-
-
-#feeCheck(dataCsv)
-#exit
-
-# ガイド氏名、あらかじめ取得しておいたガイド一覧の中にあるか
-def guideNameCheck(aCsv, nameAry)
-	aCsv.each_with_index {|aCsvRow, idx|
-# ガイド氏名
-		guideNameAry = $guideNameColumn.map {|item| aCsvRow[item]}
-		guideNameAry.compact!
-#		pp guideNameAry
-		guideNameAry.each {|item|
-			unless nameAry.include?(item)
-				puts " ^ ^ 「#{item}」 ^ ^"
-			end #unless
-		}
-	}
-end #def
-
-#guideNameCheck(dataCsv, guideNameAry)
-#exit
 
 # guide_check: 入力されているガイド人数と従事時間、金額の人数が同じか
 def guidesHashCountCheck(aCsv)
