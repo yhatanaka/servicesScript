@@ -87,7 +87,7 @@ class Guide_fee
 	end #def
 	
 #必要な列だけ、催行(⚪︎)・当日キャンセル(▲)・キャンセル(△)取り出す。エリア受付手当計算用
-	def selectCsvColumn4area
+	def selectCsvColumn4area(from: nil, to: nil)
 		returnCsv = @inputCsv.by_col
 		returnCsv.delete_if {|columnName, values|
 			!@reqColumns.include?(columnName.to_s)
@@ -96,7 +96,7 @@ class Guide_fee
 		returnCsv.delete_if {|returnCsvRow|
 			returnCsvRow[:キャンセル] != '〇' && returnCsvRow[:キャンセル] != '▲' && returnCsvRow[:キャンセル] != '△'
 		}
-		return returnCsv
+		return byDateRange(returnCsv, index: :ガイド実施日, from: from, to: to)
 	end #def
 	
 # '支払い' 優先、nilなら'支払い方法' ← なし
@@ -372,12 +372,14 @@ aGuide_fee = Guide_fee.new(inputFile)
 #aGuide_fee.guidesHashCountCheck
 # guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
 toDate = '2023/12/31'
-pp aGuide_fee.thisGuideHash(index: 'ガイド実施日', to: toDate)
+#pp aGuide_fee.thisGuideHash(index: 'ガイド実施日', to: toDate)
 #puts aGuide_fee.byDateRange(aGuide_fee.baseCsv, index: 'ガイド実施日', to: toDate)
-
 #	puts toCsvGuideHash(thisGuideHash(getGuides(dataCsv)))
 #	puts thisGuideHash(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts thisGuideHash(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
+
+puts aGuide_fee.selectCsvColumn4area(to: toDate)
+
 exit
 fromDate = '2023/02/01'
 
