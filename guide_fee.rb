@@ -18,7 +18,7 @@ class Guide_fee
 	require 'pp'
 	require 'thinreports'
 
-	attr_accessor :inputCsv, :reqColumns
+	attr_accessor :inputCsv, :reqColumns, :baseCsv
 	
 	def initialize(inputFile)
 # Shift_jis のcsvファイルから、項目名をシンボルにしたCSVTable
@@ -30,7 +30,8 @@ class Guide_fee
 		@guideTimeColumn = ['ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88']
 # ガイド料金11〜88、ガイド料金「総計」
 		@guideFeeColumn = ['ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88']
-
+# 案件一覧
+		@baseCsv = coupon(payment(selectCsvColumn))
 	end
 ## -- チェック用 --
 	def findOverlapColumnName
@@ -163,6 +164,21 @@ end #def
 		return "#{hmsAry[0]}:#{mFormat}"
 	end #def
 
+# 開始日、最終日を設定、その範囲のものだけ取り出す
+	def byDateRange(aCsv, index:, from: nil, to: nil)
+		if !to.nil?
+			aCsv.delete_if {|aRow|
+				Date.parse(aRow[index.to_sym]) > Date.parse(to)
+			}
+		end #if
+		if !from.nil?
+			aCsv.delete_if {|aRow|
+				Date.parse(aRow[:date]) < Date.parse(from)
+			}
+		end #unless
+		return aCsv
+	end #def
+
 
 
 # 出力
@@ -224,11 +240,6 @@ end #def
 		}
 		return aCsv
 	end #def
-# 案件一覧
-	def baseCsv
-		return coupon(payment(selectCsvColumn))
-	end
-	
 
 # 案件の、ガイド名・時間・料金の各配列、ガイドごと{氏名, 時間, 料金}のハッシュの配列で返す
 	def getGuidesHash(namesAry, timesAry, feesAry)
@@ -246,13 +257,13 @@ end #def
 
 # 各案件、ガイドごと(氏名、時間、料金)取得
 # [:name, :time, :fee, :tourID(管理番号), :date,  :course(モデルコース), :event(催し等), :cancel(キャンセル), :payment, :coupon, :charge]
-	def getGuides
+	def getGuides(aCsv=baseCsv)
 		headersBaseAry = [:name, :time, :fee]
 # 追加分 :tourID(管理番号), :date,  :course(), :event(), :cancel(), :payment, :coupon, :charge
 		headersAddAry = [:tourID, :area, :date, :course, :event, :cancel, :payment, :coupon, :charge]
 		headersAry = headersBaseAry + headersAddAry
 		table = CSV::Table.new([], headers: headersAry)
-		baseCsv.each_with_index {|aCsvRow, idx|
+		aCsv.each_with_index {|aCsvRow, idx|
 			guidesNameAry = pickupColumns(aCsvRow, @guideNameColumn)
 			guidesTimeAry = pickupColumns(aCsvRow, @guideTimeColumn)
 			guidesFeeAry = pickupColumns(aCsvRow, @guideFeeColumn)
@@ -298,30 +309,46 @@ end #def
 # guide_fee: getGuidesで返ったガイド・案件ごとのtable、ガイドごとにまとめ実施日で連番付加しHashで返す
 # {ガイド1 => [案件CSV.Row_1,案件CSV.Row_2,案件CSV.Row_3, ...], ガイド2 => ...}
 # 案件CSV.Row: 
-def addNumInThisGuide
-	guideHash = {}
+	def addNumInThisGuide(aCsv=baseCsv)
+		guideHash = {}
 # 各ガイドごと、従事した案件のArrayをHashに。
-	getGuides.each {|aRow|
-		if guideHash[aRow[:name]].nil?
-			guideHash[aRow[:name]] = [aRow]
-		else
-			guideHash[aRow[:name]] << aRow
-		end #if
-	}
-	guideHash.each {|guideName, guideAry|
-		count = 1
-# 日付でソート
-		guideAry.sort_by! {|element|
-			Date.parse(element[:date])
+		getGuides(aCsv).each {|aRow|
+			if guideHash[aRow[:name]].nil?
+				guideHash[aRow[:name]] = [aRow]
+			else
+				guideHash[aRow[:name]] << aRow
+			end #if
 		}
+		guideHash.each {|guideName, guideAry|
+			count = 1
+# 日付でソート
+			guideAry.sort_by! {|element|
+				Date.parse(element[:date])
+			}
 # 連番付加
-#		guideAry.each {|item|
-#			item[:num_in_this_guide] = count
-#			count += 1
-#		}
-	}
-	return guideHash
-end #def
+#			guideAry.each {|item|
+#				item[:num_in_this_guide] = count
+#				count += 1
+#			}
+		}
+		return guideHash
+	end #def
+
+# addNumInThisGuideで作ったガイドごとのHashから、csv作る
+	def toCsvGuideHash(aCsv=baseCsv)
+# 最初のガイドの最初の案件取り出し、headers 取得
+		firstRow = addNumInThisGuide[addNumInThisGuide.keys[0]][0]
+		addHeaders = firstRow.headers
+# 出力CSV
+		table = CSV::Table.new([], headers: addHeaders)
+		addNumInThisGuide(aCsv=baseCsv).each {|name, tourAry|
+			tourAry.each {|aTour|
+				table << aTour
+			}
+		}
+		return table
+	end #def
+
 
 end #class
 
@@ -339,11 +366,30 @@ aGuide_fee = Guide_fee.new(inputFile)
 #aGuide_fee.guideNameCheck(CSV.table('guideName.csv')[:name])
 #aGuide_fee.guidesHashCountCheck
 # guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
-puts aGuide_fee.addNumInThisGuide
+puts aGuide_fee.toCsvGuideHash
 #	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
 exit
+fromDate = '2023/02/01'
+toDate = '2023/12/31'
+
+allCsv3 = selectCsvColumn(inputCsv,reqColumns)
+dataCsv = byDateRange(coupon(payment(allCsv3)), index: 'ガイド実施日', to: toDate)
+
+# 各エリアごとに、催行・当日キャンセル・キャンセルの件数まとめる
+def areaCountCsv(aCsv)
+	return aCsv
+end #def
+
+reqColumns_area = ['管理番号', 'エリア', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', 'ガイド完了', 'キャンセル', 'クーポン', 'ガイド料金総計', 'ガイド実施日2']
+
+# area_count_csv: エリアごとの受付件数出力
+if ARGV.include?('area_count_csv')
+	pp areaCountCsv(byDateRange(selectCsvColumn4area(inputCsv,reqColumns_area), index: 'ガイド実施日', to: toDate))
+end #if
+
+
 # baseCsv: 案件を出力 → 保存
 
 # 不要？
@@ -355,9 +401,6 @@ def makeColumnAryFlat(aCsv, columnName)
 	}
 	return returnAry
 end #def
-
-
-
 
 # ガイドの所属する4エリア
 $guideRegHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
@@ -487,42 +530,6 @@ def pdfFeeFormat(valueString)
 	return sign + valueString.to_s.reverse.scan(/.{1,3}/).join(",").reverse
 end #def
 
-# addNumInThisGuideで作ったガイドごとのHashから、csv作る
-def toCsvGuideHash(guideHash)
-# 最初のガイドの最初の案件取り出し、headers 取得
-	firstRow = guideHash[guideHash.keys[0]][0]
-	addHeaders = firstRow.headers
-# 出力CSV
-	table = CSV::Table.new([], headers: addHeaders)
-	guideHash.each {|name, tourAry|
-		tourAry.each {|aTour|
-			table << aTour
-		}
-	}
-	return table
-end #def
-
-# 開始日、最終日を設定、その範囲のものだけ取り出す
-def byDateRange(aCsv, index:, from: nil, to: nil)
-	if !to.nil?
-		aCsv.delete_if {|aRow|
-			Date.parse(aRow[index.to_sym]) > Date.parse(to)
-		}
-	end #if
-	if !from.nil?
-		aCsv.delete_if {|aRow|
-			Date.parse(aRow[:date]) < Date.parse(from)
-		}
-	end #unless
-	return aCsv
-end #def
-
-fromDate = '2023/02/01'
-toDate = '2023/12/31'
-
-allCsv3 = selectCsvColumn(inputCsv,reqColumns)
-dataCsv = byDateRange(coupon(payment(allCsv3)), index: 'ガイド実施日', to: toDate)
-
 #dataFile = '/Users/hatanaka/Dropbox/ジオパーク/ガイドの会/base1.csv'
 #dataCsv = CSV.read(dataFile, headers: true)
 
@@ -539,18 +546,6 @@ if ARGV.include?('guide_fee_pdf')
 	toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)), allGuideListCsv, feePdfTemplate)
 end #if
 
-
-# 各エリアごとに、催行・当日キャンセル・キャンセルの件数まとめる
-def areaCountCsv(aCsv)
-	return aCsv
-end #def
-
-reqColumns_area = ['管理番号', 'エリア', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', 'ガイド完了', 'キャンセル', 'クーポン', 'ガイド料金総計', 'ガイド実施日2']
-
-# area_count_csv: エリアごとの受付件数出力
-if ARGV.include?('area_count_csv')
-	pp areaCountCsv(byDateRange(selectCsvColumn4area(inputCsv,reqColumns_area), index: 'ガイド実施日', to: toDate))
-end #if
 
 
 =begin
