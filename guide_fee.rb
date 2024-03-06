@@ -19,15 +19,16 @@ inputFile = ARGV.shift
 
 class Guide_fee
 	attr_accessor :inputCsv
-	@header_converter = lambda {|h| h.to_sym}
 	def initialize(inputFile)
+# Shift_jis のcsvファイルから、項目名をシンボルにしたCSVTable
+		header_converter = lambda {|h| h.to_sym}
 		inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
-		@inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: @header_converter)
+		@inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: header_converter)
 	end
 ## -- チェック用 --
-	def findOverlap(aCsv)
+	def findOverlapColumnName
 #重複するヘッダ項目をチェック。各項目の個数を集計し、2回以上出た項目とその回数を表示。重複回避してから処理にかかる。
-		headersAry = aCsv.headers
+		headersAry = @inputCsv.headers
 		headersHash = {}
 		headersAry.each {|item|
 			if headersHash[item].nil?
@@ -46,31 +47,31 @@ class Guide_fee
 		puts '重複項目数: ' + count.to_s
 		return headersHash
 	end #def
+	
+	def kanriBangouCheck
+		rowsHash = {}
+		@inputCsv.each_with_index {|row, idx|
+			if row[:管理番号] == '' || row[:管理番号].nil?
+				puts "error: #{idx} index is null"
+				pp row
+				pp ''
+			elsif rowsHash[row[:管理番号]]
+				puts "error: #{idx} already exist."
+				pp rowsHash[row[:管理番号]]
+				pp row
+				pp ''
+			else
+				rowsHash[row[:管理番号]] = [idx,row]
+			end #if
+		}
+	end
 end #class
 # test
 aGuide_fee = Guide_fee.new(inputFile)
-pp aGuide_fee.inputCsv
+#aGuide_fee.findOverlapColumnName
+#pp aGuide_fee.inputCsv
+aGuide_fee.kanriBangouCheck
 exit
-if ARGV.include?('test')
-#	pp aGuide_fee.findOverlap(inputCsv)
-	rowsHash = {}
-	inputCsv.each_with_index {|row, idx|
-		if row[:管理番号] == '' || row[:管理番号].nil?
-			puts "error: #{idx} index is null"
-			pp row
-			pp ''
-		elsif rowsHash[row[:管理番号]]
-			puts "error: #{idx} already exist."
-			pp rowsHash[row[:管理番号]]
-			pp row
-			pp ''
-		else
-			rowsHash[row[:管理番号]] = [idx,row]
-		end #if
-#		pp row[:管理番号]
-	}
-	exit
-end #if
 
 reqColumns = ['申込番号', '管理番号', 'エリア', 'エリア名', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8', 'ガイド完了', 'ガイド時間', 'ガイド時間1', 'ガイド時間2', 'ガイド時間3', 'ガイド時間4', 'ガイド時間5', 'ガイド時間6', 'ガイド時間7', 'ガイド時間8', 'ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88', 'ガイド料金', 'ガイド料金2', 'ガイド料金3', 'ガイド料金4', 'ガイド料金5', 'ガイド料金6', 'ガイド料金7', 'ガイド料金8', 'ガイド料金合計', 'キャンセル', 'キャンセル2', '支払い', 'クーポン', 'ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88', 'ガイド料金総計', 'ガイド実施日2']
 
