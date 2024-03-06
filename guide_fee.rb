@@ -11,13 +11,13 @@ Encoding.default_external = "UTF-8"
 # guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
 # ガイド受付システムからExportしたCSVファイルから、ガイドごとの支払い金額集計
 
-require 'csv'
-require 'pp'
-require 'thinreports'
-
 inputFile = ARGV.shift
 
 class Guide_fee
+	require 'csv'
+	require 'pp'
+	require 'thinreports'
+
 	attr_accessor :inputCsv, :reqColumns
 	
 	def initialize(inputFile)
@@ -25,7 +25,12 @@ class Guide_fee
 		header_converter = lambda {|h| h.to_sym}
 		inputFileContents = IO.read(inputFile, encoding: 'SJIS').encode('UTF-8')
 		@inputCsv = CSV.parse(inputFileContents, headers: true, skip_blanks: true, header_converters: header_converter)
-	@reqColumns = ['申込番号', '管理番号', 'エリア', 'エリア名', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8', 'ガイド完了', 'ガイド時間', 'ガイド時間1', 'ガイド時間2', 'ガイド時間3', 'ガイド時間4', 'ガイド時間5', 'ガイド時間6', 'ガイド時間7', 'ガイド時間8', 'ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88', 'ガイド料金', 'ガイド料金2', 'ガイド料金3', 'ガイド料金4', 'ガイド料金5', 'ガイド料金6', 'ガイド料金7', 'ガイド料金8', 'ガイド料金合計', 'キャンセル', 'キャンセル2', '支払い', 'クーポン', 'ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88', 'ガイド料金総計', 'ガイド実施日2']
+		@reqColumns = ['申込番号', '管理番号', 'エリア', 'エリア名', '団体名', '氏名', 'ガイド実施日', '開始時刻', '終了時刻', '開始時刻2', '終了時刻2', 'モデルコース', '催し等', 'モデルコース2', '支払い方法', '案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8', 'ガイド完了', 'ガイド時間', 'ガイド時間1', 'ガイド時間2', 'ガイド時間3', 'ガイド時間4', 'ガイド時間5', 'ガイド時間6', 'ガイド時間7', 'ガイド時間8', 'ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88', 'ガイド料金', 'ガイド料金2', 'ガイド料金3', 'ガイド料金4', 'ガイド料金5', 'ガイド料金6', 'ガイド料金7', 'ガイド料金8', 'ガイド料金合計', 'キャンセル', 'キャンセル2', '支払い', 'クーポン', 'ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88', 'ガイド料金総計', 'ガイド実施日2']
+		@guideNameColumn = ['案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8']
+		@guideTimeColumn = ['ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88']
+# ガイド料金11〜88、ガイド料金「総計」
+		@guideFeeColumn = ['ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88']
+
 	end
 ## -- チェック用 --
 	def findOverlapColumnName
@@ -67,6 +72,43 @@ class Guide_fee
 			end #if
 		}
 	end
+
+# ガイド名が入ってないところは、(ガイド時間、)ガイド料金入ってないことを確かめる
+	def feeCheck
+		baseCsv.each_with_index {|aCsvRow, idx|
+# ガイド氏名、ガイド料金
+			guideNameFeeArys = [@guideNameColumn, @guideFeeColumn].map {|item| pickupColumns(aCsvRow, item)}
+# ガイド時間
+			guideTimeAry = @guideTimeColumn.map {|item| aCsvRow[item]}
+			guideNameAry = guideNameFeeArys[0]
+			guideFeeAry = guideNameFeeArys[1]
+# ガイド氏名が入ってないところは？
+			nameNilAry = []
+			guideNameAry.each_with_index {|item, idx|
+				if item.nil?
+					nameNilAry << idx
+				end #if
+			}
+# そこの「ガイド時間」は nil か「0時00分00秒」
+#	nameNilTimeAry = nameNilAry.map {|item| guideTimeAry[item]}
+#print idx.to_s + ': '
+#pp nameNilTimeAry
+#	nameNilTimeAry.each {|item|
+#		if !item.nil? && item != '0時00分00秒'
+#			puts "#{idx}: time is no nil"
+#			pp nameNilTimeAry
+#		end #if
+#	}
+# そこの「ガイド料金」は nil か「0時00分00秒」
+			nameNilFeeAry = nameNilAry.map {|item| guideFeeAry[item]}
+			nameNilFeeAry.each {|item|
+				if item != '0' && !item.nil?
+					puts "#{idx}: fee is no 0"
+					pp nameNilFeeAry
+				end #if
+			}
+		}
+	end #def
 
 # 出力
 #必要な列だけ、ガイド名入ったもの・催行(⚪︎)・当日キャンセル(▲)取り出す。
@@ -147,7 +189,8 @@ aGuide_fee = Guide_fee.new(inputFile)
 #aGuide_fee.kanriBangouCheck
 #pp aGuide_fee.instance_variables
 #pp aGuide_fee.selectCsvColumn
-pp aGuide_fee.baseCsv
+#pp aGuide_fee.baseCsv
+aGuide_fee.feeCheck
 exit
 # baseCsv: 案件を出力 → 保存
 
@@ -161,53 +204,7 @@ def makeColumnAryFlat(aCsv, columnName)
 	return returnAry
 end #def
 
-$guideNameColumn = ['案内人1', '案内人2', '案内人3', '案内人4', '案内人5', '案内人6', '案内人7', '案内人8']
-$guideTimeColumn = ['ガイド時間11', 'ガイド時間22', 'ガイド時間33', 'ガイド時間44', 'ガイド時間55', 'ガイド時間66', 'ガイド時間77', 'ガイド時間88']
-# ガイド料金11〜88、ガイド料金「総計」
-$guideFeeColumn = ['ガイド料金11', 'ガイド料金22', 'ガイド料金33', 'ガイド料金44', 'ガイド料金55', 'ガイド料金66', 'ガイド料金77', 'ガイド料金88']
 
-## -- チェック用 --
-# ガイド名が入ってないところは、(ガイド時間、)ガイド料金入ってないことを確かめる
-def feeCheck(aCsv)
-	guideNameColumn = $guideNameColumn
-	guideTimeColumn = $guideTimeColumn
-# ガイド料金11〜88、ガイド料金「総計」
-	guideFeeColumn = $guideFeeColumn
-	
-	aCsv.each_with_index {|aCsvRow, idx|
-# ガイド氏名、ガイド料金
-		guideNameFeeArys = [guideNameColumn, guideFeeColumn].map {|item| pickupColumns(aCsvRow, item)}
-# ガイド時間
-		guideTimeAry = guideTimeColumn.map {|item| aCsvRow[item]}
-		guideNameAry = guideNameFeeArys[0]
-		guideFeeAry = guideNameFeeArys[1]
-# ガイド氏名が入ってないところは？
-		nameNilAry = []
-		guideNameAry.each_with_index {|item, idx|
-			if item.nil?
-				nameNilAry << idx
-			end #if
-		}
-# そこの「ガイド時間」は nil か「0時00分00秒」
-#	nameNilTimeAry = nameNilAry.map {|item| guideTimeAry[item]}
-#print idx.to_s + ': '
-#pp nameNilTimeAry
-#	nameNilTimeAry.each {|item|
-#		if !item.nil? && item != '0時00分00秒'
-#			puts "#{idx}: time is no nil"
-#			pp nameNilTimeAry
-#		end #if
-#	}
-# そこの「ガイド料金」は nil か「0時00分00秒」
-		nameNilFeeAry = nameNilAry.map {|item| guideFeeAry[item]}
-		nameNilFeeAry.each {|item|
-			if item != '0' && !item.nil?
-				puts "#{idx}: fee is no 0"
-				pp nameNilFeeAry
-			end #if
-		}
-	}
-end #def
 
 #feeCheck(dataCsv)
 #exit
