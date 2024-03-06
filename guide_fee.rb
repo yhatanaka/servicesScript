@@ -197,7 +197,7 @@ class Guide_fee
 # guide_fee: getGuidesで返ったガイド・案件ごとのtable、ガイドごとにまとめ実施日で連番付加しHashで返す
 # {ガイド1 => [案件CSV.Row_1,案件CSV.Row_2,案件CSV.Row_3, ...], ガイド2 => ...}
 # 案件CSV.Row: 
-	def addNumInThisGuide(aCsv=baseCsv, index: nil, from: nil, to: nil)
+	def thisGuideHash(aCsv=baseCsv, index: nil, from: nil, to: nil)
 		guideHash = {}
 # 各ガイドごと、従事した案件のArrayをHashに。
 		getGuides(aCsv, index: index, from: from, to: to).each {|aRow|
@@ -222,14 +222,14 @@ class Guide_fee
 		return guideHash
 	end #def
 
-# addNumInThisGuideで作ったガイドごとのHashから、csv作る
+# thisGuideHashで作ったガイドごとのHashから、csv作る
 	def toCsvGuideHash(aCsv=baseCsv, index: nil, from: nil, to: nil)
 # 最初のガイドの最初の案件取り出し、headers 取得
-		firstRow = addNumInThisGuide[addNumInThisGuide.keys[0]][0]
+		firstRow = thisGuideHash[thisGuideHash.keys[0]][0]
 		addHeaders = firstRow.headers
 # 出力CSV
 		table = CSV::Table.new([], headers: addHeaders)
-		addNumInThisGuide(aCsv=baseCsv, index: index, from: from, to: to).each {|name, tourAry|
+		thisGuideHash(aCsv=baseCsv, index: index, from: from, to: to).each {|name, tourAry|
 			tourAry.each {|aTour|
 				table << aTour
 			}
@@ -372,12 +372,12 @@ aGuide_fee = Guide_fee.new(inputFile)
 #aGuide_fee.guidesHashCountCheck
 # guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
 toDate = '2023/12/31'
-pp aGuide_fee.addNumInThisGuide(index: 'ガイド実施日', to: toDate)
+pp aGuide_fee.thisGuideHash(index: 'ガイド実施日', to: toDate)
 #puts aGuide_fee.byDateRange(aGuide_fee.baseCsv, index: 'ガイド実施日', to: toDate)
 
-#	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
-#	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
-#	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
+#	puts toCsvGuideHash(thisGuideHash(getGuides(dataCsv)))
+#	puts thisGuideHash(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
+#	puts thisGuideHash(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
 exit
 fromDate = '2023/02/01'
 
@@ -414,7 +414,7 @@ $guideRegHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  
 # ガイドする5エリア
 $guideAreaHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田エリア', '5' => '飛島エリア'}
 
-# addNumInThisGuideで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
+# thisGuideHashで作ったガイドごとのHashから、PDF作る。ガイドの所属を、guideListCsvから取得
 # 'GuidePDF'フォルダの中の、エリアNo.(1..4)の中にPDF作る
 def toPdfGuideHash(guideHash, guideListCsv, pdfTemplate)
 # ガイドごと
@@ -550,7 +550,7 @@ if ARGV.include?('guide_fee_pdf')
 	guideListFile = 'guideName.csv'
 	allGuideListCsv = CSV.read(guideListFile, headers: true, skip_blanks: true, header_converters: header_converter)
 #pp allGuideListCsv
-	toPdfGuideHash(addNumInThisGuide(getGuides(dataCsv)), allGuideListCsv, feePdfTemplate)
+	toPdfGuideHash(thisGuideHash(getGuides(dataCsv)), allGuideListCsv, feePdfTemplate)
 end #if
 
 
