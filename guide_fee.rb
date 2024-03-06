@@ -146,6 +146,25 @@ class Guide_fee
 	end #def
 
 
+# 年月日の表示フォーマット
+def dateFormat(ymdAry)
+#	mFormat = sprintf("%02d", hmsAry[1])
+	return "#{ymdAry[0]}/#{ymdAry[1]}/#{ymdAry[2]}"
+end #def
+
+# aCsvRowの中の、columnsAryの項目の配列を取得
+	def pickupColumns(aCsvRow, columnsAry)
+		return columnsAry.map {|item| aCsvRow[item.to_sym]}
+	end #def
+
+# 従事時間の表示フォーマット
+	def timeRangeFormat(hmsAry)
+		mFormat = sprintf("%02d", hmsAry[1])
+		return "#{hmsAry[0]}:#{mFormat}"
+	end #def
+
+
+
 # 出力
 #必要な列だけ、ガイド名入ったもの・催行(⚪︎)・当日キャンセル(▲)取り出す。
 	def selectCsvColumn
@@ -225,17 +244,84 @@ class Guide_fee
 		return guidesHashAry
 	end #def
 
-# aCsvRowの中の、columnsAryの項目の配列を取得
-	def pickupColumns(aCsvRow, columnsAry)
-		return columnsAry.map {|item| aCsvRow[item.to_sym]}
+# 各案件、ガイドごと(氏名、時間、料金)取得
+# [:name, :time, :fee, :tourID(管理番号), :date,  :course(モデルコース), :event(催し等), :cancel(キャンセル), :payment, :coupon, :charge]
+	def getGuides
+		headersBaseAry = [:name, :time, :fee]
+# 追加分 :tourID(管理番号), :date,  :course(), :event(), :cancel(), :payment, :coupon, :charge
+		headersAddAry = [:tourID, :area, :date, :course, :event, :cancel, :payment, :coupon, :charge]
+		headersAry = headersBaseAry + headersAddAry
+		table = CSV::Table.new([], headers: headersAry)
+		baseCsv.each_with_index {|aCsvRow, idx|
+			guidesNameAry = pickupColumns(aCsvRow, @guideNameColumn)
+			guidesTimeAry = pickupColumns(aCsvRow, @guideTimeColumn)
+			guidesFeeAry = pickupColumns(aCsvRow, @guideFeeColumn)
+# 各ガイドごとのHash
+			getGuidesHash(guidesNameAry, guidesTimeAry, guidesFeeAry).each {|item|
+# 年月日それぞれ抽出
+				dateAry = /([0-9]{4})年([0-9]{2})月([0-9]{2})日/.match(aCsvRow[:ガイド実施日2]).to_a.values_at(1,2,3).map{|item| item.to_i}
+# 支払い(請求)額計算。口座/現金、クーポン、当日キャンセルから。
+				aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
+# 案件のデータから、必要な項目持ってきて付加。headersAddAry に合わせる
+				rowValues = item.values + [aCsvRow[:管理番号], aCsvRow[:エリア], dateFormat(dateAry), aCsvRow[:モデルコース], aCsvRow[:催し等], aCsvRow[:キャンセル], aCsvRow[:payment], aCsvRow[:coupon], aCharge]
+				table << CSV::Row.new(table.headers, rowValues)
+			}
+		}
+		return table
 	end #def
 
-# 従事時間の表示フォーマット
-	def timeRangeFormat(hmsAry)
-		mFormat = sprintf("%02d", hmsAry[1])
-		return "#{hmsAry[0]}:#{mFormat}"
+# ガイド料、支払い方法、クーポン から、振込額/納付手数料を計算
+	def guideCharge(fee, payment, coupon, cancel)
+		charge = nil
+		unless fee.nil?
+			if cancel == '▲' # 当日キャンセルは半額振込、手数料 10% 差し引く
+				charge = fee*(0.45)
+			else # 催行
+				if payment == :口座 # 手数料 10% 差し引く
+					charge = fee*(0.9)
+				elsif payment == :現金 # 手数料 10% 徴収
+					if coupon.nil? || !coupon
+						charge = fee*(-0.1)
+					elsif coupon == true
+						charge = fee*(-0.2)
+					elsif coupon.downcase == 'true' # Numbers で編集・書き出したもの(couponが大文字)に対処
+						charge = fee*(-0.2)
+					elsif coupon.downcase == 'false' # Numbers で編集・書き出したもの(couponが大文字)に対処
+						charge = fee*(-0.1)
+					end #if coupon
+				end #if payment
+			end #if cancel
+		end #unless
+		return charge.to_i || nil
 	end #def
 
+# guide_fee: getGuidesで返ったガイド・案件ごとのtable、ガイドごとにまとめ実施日で連番付加しHashで返す
+# {ガイド1 => [案件CSV.Row_1,案件CSV.Row_2,案件CSV.Row_3, ...], ガイド2 => ...}
+# 案件CSV.Row: 
+def addNumInThisGuide
+	guideHash = {}
+# 各ガイドごと、従事した案件のArrayをHashに。
+	getGuides.each {|aRow|
+		if guideHash[aRow[:name]].nil?
+			guideHash[aRow[:name]] = [aRow]
+		else
+			guideHash[aRow[:name]] << aRow
+		end #if
+	}
+	guideHash.each {|guideName, guideAry|
+		count = 1
+# 日付でソート
+		guideAry.sort_by! {|element|
+			Date.parse(element[:date])
+		}
+# 連番付加
+#		guideAry.each {|item|
+#			item[:num_in_this_guide] = count
+#			count += 1
+#		}
+	}
+	return guideHash
+end #def
 
 end #class
 
@@ -251,14 +337,12 @@ aGuide_fee = Guide_fee.new(inputFile)
 #guideNameAry = CSV.table('guideName.csv')[:name]
 #pp guideNameAry
 #aGuide_fee.guideNameCheck(CSV.table('guideName.csv')[:name])
-aGuide_fee.guidesHashCountCheck
+#aGuide_fee.guidesHashCountCheck
 # guide_fee_flat_csv: ガイドごとの支払い金額明細をベタでCSV出力
-if ARGV.include?('guide_fee_flat_csv')
-	puts aGuide_fee.getGuides
+puts aGuide_fee.addNumInThisGuide
 #	puts toCsvGuideHash(addNumInThisGuide(getGuides(dataCsv)))
 #	puts addNumInThisGuide(getGuides(byDateRange(dataCsv, index: 'ガイド実施日', to: toDate))).to_csv
 #	puts addNumInThisGuide(byDateRange(getGuides(dataCsv), index: 'date', to: toDate)).to_csv
-end #if
 exit
 # baseCsv: 案件を出力 → 保存
 
@@ -274,91 +358,6 @@ end #def
 
 
 
-# ガイド料、支払い方法、クーポン から、振込額/納付手数料を計算
-def guideCharge(fee, payment, coupon, cancel)
-	charge = nil
-	unless fee.nil?
-		if cancel == '▲' # 当日キャンセルは半額振込、手数料 10% 差し引く
-			charge = fee*(0.45)
-		else # 催行
-			if payment == :口座 # 手数料 10% 差し引く
-				charge = fee*(0.9)
-			elsif payment == :現金 # 手数料 10% 徴収
-				if coupon.nil? || !coupon
-					charge = fee*(-0.1)
-				elsif coupon == true
-					charge = fee*(-0.2)
-				elsif coupon.downcase == 'true' # Numbers で編集・書き出したもの(couponが大文字)に対処
-					charge = fee*(-0.2)
-				elsif coupon.downcase == 'false' # Numbers で編集・書き出したもの(couponが大文字)に対処
-					charge = fee*(-0.1)
-				end #if coupon
-			end #if payment
-		end #if cancel
-	end #unless
-	return charge.to_i || nil
-end #def
-
-# 年月日の表示フォーマット
-def dateFormat(ymdAry)
-#	mFormat = sprintf("%02d", hmsAry[1])
-	return "#{ymdAry[0]}/#{ymdAry[1]}/#{ymdAry[2]}"
-end #def
-
-# 各案件、ガイドごと(氏名、時間、料金)取得
-# [:name, :time, :fee, :tourID(管理番号), :date,  :course(モデルコース), :event(催し等), :cancel(キャンセル), :payment, :coupon, :charge]
-def getGuides(aCsv)
-	headersBaseAry = [:name, :time, :fee]
-# 追加分 :tourID(管理番号), :date,  :course(), :event(), :cancel(), :payment, :coupon, :charge
-	headersAddAry = [:tourID, :area, :date, :course, :event, :cancel, :payment, :coupon, :charge]
-	headersAry = headersBaseAry + headersAddAry
-	table = CSV::Table.new([], headers: headersAry)
-	aCsv.each_with_index {|aCsvRow, idx|
-		guidesNameAry = pickupColumns(aCsvRow, $guideNameColumn)
-		guidesTimeAry = pickupColumns(aCsvRow, $guideTimeColumn)
-		guidesFeeAry = pickupColumns(aCsvRow, $guideFeeColumn)
-# 各ガイドごとのHash
-		getGuidesHash(guidesNameAry, guidesTimeAry, guidesFeeAry).each {|item|
-# 年月日それぞれ抽出
-			dateAry = /([0-9]{4})年([0-9]{2})月([0-9]{2})日/.match(aCsvRow[:ガイド実施日2]).to_a.values_at(1,2,3).map{|item| item.to_i}
-# 支払い(請求)額計算。口座/現金、クーポン、当日キャンセルから。
-			aCharge = guideCharge(item[:fee], aCsvRow[:payment], aCsvRow[:coupon], aCsvRow[:キャンセル])
-# 案件のデータから、必要な項目持ってきて付加。headersAddAry に合わせる
-			rowValues = item.values + [aCsvRow[:管理番号], aCsvRow[:エリア], dateFormat(dateAry), aCsvRow[:モデルコース], aCsvRow[:催し等], aCsvRow[:キャンセル], aCsvRow[:payment], aCsvRow[:coupon], aCharge]
-			table << CSV::Row.new(table.headers, rowValues)
-		}
-
-	}
-	return table
-end #def
-
-# guide_fee: getGuidesで返ったガイド・案件ごとのtable、ガイドごとにまとめ実施日で連番付加しHashで返す
-# {ガイド1 => [案件CSV.Row_1,案件CSV.Row_2,案件CSV.Row_3, ...], ガイド2 => ...}
-# 案件CSV.Row: 
-def addNumInThisGuide(aTable)
-	guideHash = {}
-# 各ガイドごと、従事した案件のArrayをHashに。
-	aTable.each {|aRow|
-		if guideHash[aRow[:name]].nil?
-			guideHash[aRow[:name]] = [aRow]
-		else
-			guideHash[aRow[:name]] << aRow
-		end #if
-	}
-	guideHash.each {|guideName, guideAry|
-		count = 1
-# 日付でソート
-		guideAry.sort_by! {|element|
-			Date.parse(element[:date])
-		}
-# 連番付加
-		guideAry.each {|item|
-			item[:num_in_this_guide] = count
-			count += 1
-		}
-	}
-	return guideHash
-end #def
 
 # ガイドの所属する4エリア
 $guideRegHash = {'1' => 'にかほエリア',  '2' => '由利本荘エリア',  '3' => '遊佐エリア',  '4' => '酒田・飛島エリア'}
