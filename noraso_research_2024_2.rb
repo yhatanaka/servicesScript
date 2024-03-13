@@ -9,20 +9,22 @@ periodArray = []
 dateArray = []
 
 ARGV.each do |f|
-# yyyy-m-n
+# yyyy-mm
 	periodArray = f.split('-')
 end
 
-# periodArray = '2021-12-2'.split('-')
+# periodArray = '2021-12'.split('-')
 
 targetYear = periodArray[0].to_i
 targetMonth = periodArray[1].to_i
 startDate = 1
+# その月の最後の日
 lastDate = Date.new(targetYear, targetMonth, 1).next_month.prev_day.day
 
 i = 0
 while i < 7
 	theDate = Date.new(targetYear, targetMonth, startDate + i)
+# 0:日曜, 5:金曜
 	if theDate.wday == 0 || theDate.wday == 5 then
 		dateArray << startDate + i
 	end #if
@@ -31,6 +33,7 @@ end #while
 
 if dateArray.size == 2
 	Array.new(dateArray).each do |theDate|
+# 1〜5週後の日・金
 		for i in [1,2,3,4,5]
 			if theDate + i*7 <= lastDate then
 				dateArray << theDate + i*7
