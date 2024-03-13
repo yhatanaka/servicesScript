@@ -17,13 +17,8 @@ end
 
 targetYear = periodArray[0].to_i
 targetMonth = periodArray[1].to_i
-if periodArray[2].to_i == 1 then
-	startDate = 1
-	lastDate = 15
-elsif periodArray[2].to_i == 2 then
-	startDate = 16
-	lastDate = Date.new(targetYear, targetMonth, 1).next_month.prev_day.day
-end #if
+startDate = 1
+lastDate = Date.new(targetYear, targetMonth, 1).next_month.prev_day.day
 
 i = 0
 while i < 7
@@ -36,7 +31,7 @@ end #while
 
 if dateArray.size == 2
 	Array.new(dateArray).each do |theDate|
-		for i in [1,2]
+		for i in [1,2,3,4,5]
 			if theDate + i*7 <= lastDate then
 				dateArray << theDate + i*7
 			end #if
@@ -60,18 +55,12 @@ pageFormatAry = pageFormatString.split(/\n/)
 pageFormatString4enwikipedia = 'https://en.wikipedia.org/wiki/%s_%d'
 
 dateArray.sort.each do |aDate|
-	searchMonth = targetMonth
-	searchDay = aDate
-	puts searchDay
-
 	urlList = []
 	pageFormatAry.each do |page|
-		urlList.push(sprintf(page, searchMonth, searchDay))
+		urlList.push(sprintf(page, targetMonth, aDate))
 	end #each
-	monthName = Date.new(targetYear,searchMonth,1).strftime(format = '%B')
-	pp monthName
-	urlList.push(sprintf(pageFormatString4enwikipedia, monthName, searchDay))
-	#pp urlList
+	monthName = Date.new(targetYear,targetMonth,1).strftime(format = '%B')
+	urlList.push(sprintf(pageFormatString4enwikipedia, monthName, aDate))
 	
 	ul = Oga::XML::Element.new(:name => 'ul')
 	
@@ -84,7 +73,10 @@ dateArray.sort.each do |aDate|
 		li.children << a_href
 		ul.children << li
 	end #each
-	
+	dateDiv = Oga::XML::Element.new(:name => 'div')
+	oaDateStr = Date.new(targetYear, targetMonth, aDate).strftime('%m/%d %a')
+	dateDiv.inner_text = oaDateStr
+	body.children << dateDiv
 	body.children << ul
 
 end #each
