@@ -1,10 +1,13 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby -Ku
+#%%%{CotEditorXInput=Selection}%%%
+#%%%{CotEditorXOutput=ReplaceSelection}%%%
+
 require "pp"
 require 'uri'
 result = Array.new
 
 #inputURL = File.read(ARGV.shift)
-inputURL = ARGV.shift
+#inputURL = ARGV.shift
 
 def url_http(str)
 	if (str.match(%r{.+(https?://.+)}))
@@ -32,9 +35,11 @@ def removeParam(str)
 end
 
 
-inputURLary = inputURL.split("\n")
+#inputURLary = inputURL.split("\n")
 
-inputURLary.each do |f|
+#inputURLary.each do |f|
+while $stdin.gets
+	f = $_
 	sanitizedURL = url_http(URI.unescape(f))
 	sanitizedURL = removeDir(sanitizedURL)
 	sanitizedURL = removeParam(removeCommaDigit(removeGetParam(sanitizedURL)))
