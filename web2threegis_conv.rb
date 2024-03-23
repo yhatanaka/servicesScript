@@ -21,7 +21,8 @@ document = Oga.parse_html(handle)
 
 head = document.at_xpath('html/head')
 link1 = head
-#送付用
+# 送付用は、htmlファイル名の後に何か適当な追加の引数つける。
+# もし追加の引数なければ(サイト公開用)、1階層上のライブラリ・CSSを見に行くようリンク変更。
 if sendFlag.nil?
     head.css('link').first['href'] = '../Qgis2threejs/Qgis2threejs.css'
     startRegexp = Regexp.new('./')
