@@ -99,8 +99,10 @@ begin
 # 口座番号 => {支店 => , 氏名（カナ）=>, 金額 => , 連番 =>}
 		kingaku = convPayValue2int(payout['金額'])
 		if kingaku > 0 && payout['姓ヨミ']
+# 口座番号が複数(総合交流促進施設) -> 金額合計
 			if personsHash.key?(payout['口座番号'])
 				personsHash[payout['口座番号']]['金額'] += kingaku
+# 普通の顧客
 			else
 				personsHash[payout['口座番号']] = Hash.new
 # 2022-03-01以降、吹浦支店(021)は遊佐支店(016)へ
