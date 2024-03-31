@@ -15,7 +15,8 @@ outputCSVString = CSV::generate_line(headerArray)
 	eventArray = Array.new(3)
 while $stdin.gets
 	line = $_
-	if /^予定日: (20[12][0-9])\/([01][0-9])\/([0-3][0-9]) ([0-9:]+)〜([0-9:]+)/.match(line)
+	if /^予定日: (20[12][0-9])\/([01][0-9])\/([0-3][0-9]) ([0-9:]+)から([0-9:]+)/.match(line)
+#	if /^予定日: (20[12][0-9])\/([01][0-9])\/([0-3][0-9]) ([0-9:]+)〜([0-9:]+)/.match(line)
 		eventArray[0] = $1 + '-' + $2 + '-' + $3 + ' ' + $4 + ':00'
 		eventArray[1] = $1 + '-' + $2 + '-' + $3 + ' ' + $5 + ':00'
 		outputCSVString << CSV::generate_line(eventArray)
