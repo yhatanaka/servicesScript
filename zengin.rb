@@ -36,7 +36,7 @@ end #def
 
 # -w: 入力 UTF-8, -Z1: 全角スペースをasciiスペースに, -Z4: 全角カタカナを半角カタカナに, -w: 半角カタカナを全角に変換せず出力
 def convZengin(str)
-	noKomojiStr = str.gsub(/[ャュョ?？]/, {'ャ' => 'ヤ', 'ュ' => 'ユ', 'ョ' => 'ヨ', '?' => '', '？' => ''})
+	noKomojiStr = str.gsub(/[ャュョェ?？]/, {'ャ' => 'ヤ', 'ュ' => 'ユ', 'ョ' => 'ヨ', 'ェ' => 'エ', '?' => '', '？' => ''})
 	return NKF.nkf('-w -Z1 -Z4 -x', noKomojiStr)
 end
 
@@ -61,7 +61,7 @@ def slc_just(str, jst, count)
 	end #if
 end #def
 
-charNoNameEtc = /[^ｱ-ﾜﾝﾞﾟ0-9A-Z\- \(\)\.\r\n]/
+charNoNameEtc = /[^ｱ-ﾜﾝﾞﾟ0-9A-Zｰ\- \(\)\.\r\n]/
 
 # 3月からは'016'
 if Date.today >= dateFukura2Yuza
@@ -131,7 +131,9 @@ begin
 	}
 
 # 	総合交流施設(株) 0591647
-	personsHash['0591647']['カナ摘要'] = convTenpo('シンブンダイ')
+	unless personsHash['0591647'].nil?
+		personsHash['0591647']['カナ摘要'] = convTenpo('シンブンダイ')
+	end #unless
 
 	data_records = ''
 	sum_payouts = 0
@@ -154,7 +156,9 @@ begin
 			data_records << data_record + "\r\n"
 			sum_payouts += accountHash['金額']
 		else
-			pp '使用可能文字チェック: ' + payout['連番'] + ' ' + payout['名前'] + charNoNameEtc.match(data_record).to_a[0] + ': ' + data_record
+#pp accountHash
+			pp '使用可能文字チェック: ' + accountHash['連番'] + ' ' + accountHash['氏名'] + ': ' + data_record
+			pp charNoNameEtc.match(data_record).to_a[0]
 		end #if
 	}
 
