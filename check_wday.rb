@@ -12,7 +12,7 @@ MonthThrsld = 4
 # day_str_0 = '2021/11/3'
 day_str_0 = ARGV.shift
 day_str_1 = +day_str_0
-day_str = day_str_1.force_encoding('UTF-8')
+day_str = day_str_1.force_encoding('UTF-8').gsub(/[ 　]/, '')
 
 
 def split_date(str)
