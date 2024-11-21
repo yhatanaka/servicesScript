@@ -9,11 +9,9 @@ require 'pp'
 # puts File.read(inputFile)
 
 inputTxt = <<EOS
-食	天然	自然	キラーT細胞	記憶キラーT細胞
-粘膜	適応	A細胞	樹状細胞	ヘルパーT細胞
-好中	細胞	B細胞	形質細胞	記憶ヘルパーT細胞
-感染	体液	リンパ節	抗原抗体	マクロファージ
-抗体	増殖	特異的	抗原提示
+水	核酸	DNA	促進	イオン	炭水化物
+C	S	RNA	抑制	細胞膜	リン脂質
+N	P	溶質	溶媒	細胞壁	タンパク質
 EOS
 
 #inputFile = ARGV.shift
