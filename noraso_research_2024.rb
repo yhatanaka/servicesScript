@@ -7,6 +7,19 @@ require 'Date'
 
 # 3日後から始めて1週間（10日後まで）
 todaysDate = Date.today
+# 次の月
+nextMonthDay = todaysDate.next_month
+nextMonthYear = nextMonthDay.year
+nextMonth = nextMonthDay.month
+
+# そのまた次の月
+nextNextMonthDay = nextMonthDay.next_month
+nextNextMonthYear = nextNextMonthDay.year
+nextNextMonth = nextNextMonthDay.month
+
+print "#{nextMonthYear}-#{nextMonth}=#{nextMonthYear}-#{nextMonth}&#{nextNextMonthYear}-#{nextNextMonth}=#{nextNextMonthYear}-#{nextNextMonth}"
+exit
+
 # 3日後以降，3週間分（3〜23）
 nextOnAirDay = (3..10).each do |i|
 	searchedDay = todaysDate + i
