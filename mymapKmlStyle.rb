@@ -18,7 +18,6 @@ doc = REXML::Document.new(File.new(inputFile))
 # {fk_type1:[place1_1, place1_2,...] fk_type2:[place2_1, place2_2,...] ...}
 placemarkTypeHash = doc.get_elements('//Placemark').each_with_object(Hash.new { |v, k| v[k] = []}) {|aPlacemark, hash|
 	hash[aPlacemark.elements['styleUrl'].text] << aPlacemark.elements['name'].text
-#	hash[aPlacemark.elements['styleUrl'].text] << aPlacemark.elements['name'].text
 }
 
 pp placemarkTypeHash
