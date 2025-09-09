@@ -5,7 +5,7 @@ Encoding.default_external = "UTF-8"
 
 require 'fileutils'
 require 'pp'
-require 'Oga'
+require 'oga'
 
 inputFile = ARGV.shift
 sendFlag = ARGV.shift
