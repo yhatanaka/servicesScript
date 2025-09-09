@@ -7,7 +7,7 @@ urlList =<<~'EOS'
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/fxfe5782_12.pdf	# 極東850hPa気温・風、700hPa上昇流／700hPa湿数、500hPa気温予想図 12,24h
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/fxfe502_12.pdf	# 極東地上気圧・風・降水量／500hPa高度・渦度予想図 12,24h
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/fupa502_12.pdf	# アジア太平洋500hPa高度・気温・風予想図
-https://www.jma.go.jp/bosai/numericmap/data/nwpmap/feas502_12.pdf	# アジア地上気圧、850hPa気温／500hPa高度・渦度予想図 24h
+https://www.jma.go.jp/bosai/numericmap/data/nwpmap/feas504_12.pdf	# アジア地上気圧、850hPa気温／500hPa高度・渦度予想図 24h
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/fxjp854_12.pdf	# 日本850hPa相当温位・風予想図
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/aupa20_12.pdf	# アジア太平洋200hPa高度・気温・風・圏界面天気図
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/aupa25_12.pdf	# アジア太平洋250hPa高度・気温・風天気図
