@@ -5,17 +5,32 @@ require 'csv'
 require 'pp'
 # inputFile = ARGV.shift
 # column_num = ARGV.shift.to_i
-# column_num = 5
+column_num = 0
 # puts File.read(inputFile)
 
 inputTxt = <<EOS
-水	核酸	DNA	促進	イオン	炭水化物
-C	S	RNA	抑制	細胞膜	リン脂質
-N	P	溶質	溶媒	細胞壁	タンパク質
+ソ
+ア
+イ
+オ
+テ
+コ
+エ
+カ
+キ
+シ
+カ
+キ
+ケ
+カ
+チ
 EOS
 
 #inputFile = ARGV.shift
 #inputTxt = File.read(inputFile)
+#input = CSV.read(inputFile, headers: false)
+#input = File.readlines(inputFile)
+
 
 
 
@@ -92,12 +107,10 @@ leaderTxt = <<~EOS
 EOS
 
 leaderAry = leaderTxt.split("\n")
-sep = '.	'
+sep = '. '
+#sep = '.	'
 
-# input = CSV.read(inputFile, headers: false)
-# input = File.readlines(inputFile)
-
-outputArray = Array.new
+outputAry = Array.new
 outputRowAry = []
 resultCSV = []
 
@@ -112,21 +125,25 @@ inputAry.each {|aRow|
 	outputRowAry = []
 }
 
+if column_num > 0
+	resultCSV.flatten.each_with_index { |value,idx|
+		outputRowAry << value
+		if (idx+1)%column_num == 0
+			outputAry << outputRowAry
+			outputRowAry = []
+		end
+	}
+	resultCSV = outputAry
+end #if
+=begin
+=end
+
 # tab区切りで出力
 resultCSV.each {|aRow|
 	puts aRow.join("\t")
 }
 # puts resultCSV
 
-=begin
-input.each_with_index { |aRow,rowIdx|
-	outputRowAry << leaderAry.shift + sep + aRow.chomp
-	if (rowIdx+1)%column_num == 0
-		outputAry << outputRowAry
-		outputRowAry = []
-	end
-}
-=end
 
 
 # input.each { |aRow|
