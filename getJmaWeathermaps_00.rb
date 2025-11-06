@@ -15,7 +15,7 @@ https://www.jma.go.jp/bosai/numericmap/data/nwpmap/aupq35_00.pdf	# アジア500h
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/aupq78_00.pdf	# アジア850hPa・700hPa高度・気温・風・湿数天気図
 https://www.jma.go.jp/bosai/numericmap/data/nwpmap/axfe578_00.pdf	# 極東850hPa気温・風、700hPa上昇流／500hPa高度・渦度天気図
 https://www.data.jma.go.jp/yoho/data/wxchart/quick/ASAS_COLOR.pdf	# 地上実況天気図カラー
-#https://www.data.jma.go.jp/yoho/data/jishin/kaisetsu_tanki_latest.pdf	# 短期予報解説資料
+https://www.data.jma.go.jp/yoho/data/jishin/kaisetsu_tanki_latest.pdf	# 短期予報解説資料
 EOS
 
 urlAry = urlList.split(/\n/)
