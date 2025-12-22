@@ -4,26 +4,43 @@
 require 'csv'
 require 'pp'
 # inputFile = ARGV.shift
-# column_num = ARGV.shift.to_i
-column_num = 0
+column_num = ARGV.shift.to_i
+# column_num = 0
 # puts File.read(inputFile)
 
 inputTxt = <<EOS
-ソ
-ア
-イ
+ウ
+ヘ
 オ
-テ
-コ
+ヒ
+ヌ
+キ
+ハ
 エ
-カ
-キ
-シ
-カ
-キ
 ケ
-カ
+テ
+ス
+ケ
 チ
+ク
+ナ
+ノ
+ア
+ツ
+サ
+ア
+コ
+イ
+ソ
+カ
+ア
+タ
+ネ
+ア
+ト
+フ
+セ
+シ
 EOS
 
 #inputFile = ARGV.shift
@@ -39,7 +56,6 @@ inputAry = []
 inputTxt.split("\n").each {|aRow|
 	inputAry << aRow.split("\t")
 }
-
 # 接頭辞
 #leaderTxt = <<~EOS
 #ア
@@ -79,6 +95,7 @@ inputTxt.split("\n").each {|aRow|
 #モ
 #EOS
 
+=begin
 leaderTxt = <<~EOS
 1
 2
@@ -109,11 +126,14 @@ EOS
 leaderAry = leaderTxt.split("\n")
 sep = '. '
 #sep = '.	'
+=end
 
 outputAry = Array.new
 outputRowAry = []
 resultCSV = []
+rowEndFlag = false
 
+=begin
 inputAry.each {|aRow|
 	aRow.each {|aColumn|
 # 接頭辞+接続+項目
@@ -124,15 +144,25 @@ inputAry.each {|aRow|
 	resultCSV << outputRowAry
 	outputRowAry = []
 }
+=end
 
 if column_num > 0
-	resultCSV.flatten.each_with_index { |value,idx|
+	inputAry.flatten.each_with_index { |value,idx|
+	# resultCSV.flatten.each_with_index { |value,idx|
 		outputRowAry << value
+# 最終列では、該当行 outputRowAry のデータを outputAry に加え、outputRowAry を空にし、最終列フラグ立てる
 		if (idx+1)%column_num == 0
 			outputAry << outputRowAry
 			outputRowAry = []
+			rowEndFlag = true
+		else
+			rowEndFlag = false
 		end
 	}
+# 最終列まで行かないうち(最終列フラグ false)だったら、該当行 outputRowAry のデータを outputAry に加える
+	unless rowEndFlag
+		outputAry << outputRowAry
+	end 
 	resultCSV = outputAry
 end #if
 =begin

@@ -3,7 +3,7 @@
 # usage: ruby table_format.rb input.txt column_num
 # 選択問題の解答の記号の後に、語群の文字列をくっつける
 # = 語群の文字列を、解答の順番に並べ替える
-require 'csv'
+# require 'csv'
 require 'pp'
 # inputFile = ARGV.shift
 # puts File.read(inputFile)
