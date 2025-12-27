@@ -3,6 +3,8 @@
 #$KCODE='UTF8'
 Encoding.default_external = "UTF-8"
 
+# usage: ruby kml2geojson4umap.rb KML_FILE
+# output: file 'output_for_umap.geojson'
 # require 'csv'
 require 'pp'
 require 'rexml/document'
@@ -229,9 +231,6 @@ rescue IOError => e
   puts %Q(class=[#{e.class}] message=[#{e.message}])
 end
 
-
-
-exit
 
 f = ''
 File.open(inputFile, 'rt:UTF-8', invalid: :replace, undef: :replace, replace: '?') do |file|
