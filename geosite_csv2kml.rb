@@ -1,0 +1,157 @@
+#!//usr/bin/ruby
+# -*- coding: utf-8 -*-
+#$KCODE='UTF8'
+
+# usage: ruby csv2kml.rb input.csv format.kml output.kml
+# ジオサイト一覧のCSVファイルから、
+# require 'nkf'
+# require 'yaml'
+require 'pp'
+
+require_relative 'CsvTableUtil.rb'
+require_relative 'placeFibonacci.rb'
+
+base_dir = '/Users/hatanaka/Dropbox/ジオパーク/2024_サイト再設定/site_2024-10'
+inputFile = "#{base_dir}/site_2024-10.csv"
+# inputFile = ARGV.shift
+# formatFile = '/Users/hatanaka/Dropbox/ジオパーク/geosite_format.kml'
+# formatFile = ARGV.shift
+# outputFile = ARGV.shift
+outputKml1 = "#{base_dir}/site_2024-10.kml"
+outputKml2 = "#{base_dir}/site_2024-10_undicided.kml"
+
+outputJson1 = "#{base_dir}/site_2024-10.geojson"
+outputJson2 = "#{base_dir}/site_2024-10_undicided.geojson"
+
+headerCsv = "#{base_dir}/site_2024-10_h.csv"
+
+# outputType = :kml
+outputType = :geojson
+
+siteCsv = CsvTableUtil.new(inputFile)
+siteCsv.replaceHeaders(headerCsv)
+# 出力する項目名
+# outputColumnsAry = [:name, :lat, :lon]
+siteCsvShort = siteCsv.selectTableCol([:name, :area, :lat, :lon, :temp_id])
+
+# メイン処理
+# if ARGV.length < 2
+#   puts "使い方: ruby geosite_csv2kml.rb input.csv output.kml"
+#   exit
+# end
+
+# input_file = ARGV[0]
+# output_file = ARGV[1]
+
+
+# 座標がない場合、エリアごとに暫定的に置いとく
+areaCenter = <<-EOS
+由利本荘,39.4,139.95
+にかほ,39.25,139.85
+にかほ/遊佐,39.15,139.8
+遊佐,39.05,139.8
+酒田,38.95,139.75
+飛島,39.15,139.6
+EOS
+areaCenterHash = areaCenter.split("\n").each_with_object({}) {|area, loc|
+	areaAry = area.split(',')
+	loc[areaAry[0]] = [areaAry[1].to_f, areaAry[2].to_f]
+}
+
+if outputType == :kml
+	require_relative 'KmlUtil.rb'
+# KML の準備
+	doc1 = Document.new
+	doc1 << XMLDecl.new('1.0', 'UTF-8')
+	kml1 = doc1.add_element('kml', { 'xmlns' => 'http://www.opengis.net/kml/2.2' })
+	document1 = kml1.add_element('Document')
+	
+	doc2 = Document.new
+	doc2 << XMLDecl.new('1.0', 'UTF-8')
+	kml2 = doc2.add_element('kml', { 'xmlns' => 'http://www.opengis.net/kml/2.2' })
+	document2 = kml2.add_element('Document')
+end
+
+locAry = []
+nolocAry = []
+nolocHash = {}
+siteCsvShort.each do |feature|
+	if feature[:name]
+		if !feature[:lat] || !feature[:lon]
+# カウント用
+			if !nolocHash[feature[:area]]
+				nolocHash[feature[:area]] = 1
+			else
+				nolocHash[feature[:area]] += 1
+			end
+# "由利本荘" => 18
+# "にかほ" => 20
+# "にかほ/遊佐" => 1
+# "遊佐" => 13
+# "酒田" => 12
+# "飛島" => 5
+# placeFibonacci
+# KmlUtil
+			distStep = 0.004 # 各点、おおよそこの4倍くらい離れる
+			noLocPlaceAry = placeFibonacci(areaCenterHash[feature[:area]], nolocHash[feature[:area]]-1, distStep)
+			feature[:lat] = noLocPlaceAry[0]
+			feature[:lon] = noLocPlaceAry[1]
+				nolocAry << feature
+		else
+				locAry << feature
+		end
+	end
+end
+# カウント用
+# pp nolocHash
+# exit
+
+
+if outputType == :kml
+	docs = [document1, document2]
+	[locAry, nolocAry].each_with_index {|features, idx|
+		features.each {|feature|
+			feature4KML = {:type => 'Point', :coordinates => [feature[:lon], feature[:lat]], :option => {'name' => feature[:name], 'description' => feature[:area]}}
+			geometry_to_kml(docs[idx], feature4KML)
+		}
+	}
+	
+	[[outputKml1, doc1], [outputKml2, doc2]].each {|item|
+		File.open(item[0], 'w') do |file|
+			formatter = REXML::Formatters::Pretty.new(2)
+			# formatter.compact = true
+			formatter.write(item[1], file)
+		end
+	}
+	
+	puts "KMLファイルを出力しました: #{outputKml1}, #{outputKml2}"
+elsif outputType == :geojson
+	require_relative 'geojsonUtil.rb'
+	outputJsonAry = [outputJson1, outputJson2]
+	[locAry, nolocAry].each_with_index {|features, idx|
+		features4json = features.map {|feature|
+			{:type => 'Point', :coordinates => [feature[:lon], feature[:lat]], :properties => {'name' => feature[:name], 'description' => feature[:area], 'id' => feature[:temp_id]}}
+		}
+		jsonData = makeFeatureCollection(features4json)
+# GeoJSONをファイルに書き出し
+		File.open(outputJsonAry[idx], 'w') do |f|
+			# 見やすいように整形して書き出す
+			f.write(JSON.pretty_generate(jsonData))
+		end
+		puts "\n処理が完了しました。"
+		puts "出力ファイル: #{outputJsonAry[idx]}"
+		puts "Feature数: #{features.size}"
+	}
+end
+# outputJson1
+
+=begin
+#pp doc.root
+XPath.each(doc, '//Placemark'){|xmlelement|
+#p YAML::dump( xmlelement.elements)
+p(xmlelement.elements['name'].text)
+p(xmlelement.elements['Point/coordinates'].text)
+}
+#p YAML::dump(item)
+#p YAML::dump( xmlelement.elements)
+=end
