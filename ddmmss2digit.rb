@@ -1,9 +1,6 @@
 #!/usrbin/ruby -Ku
 # -*- coding: utf-8 -*-
 
-# qgisで書き出したKMLファイルの<Placemark>に写真(<description>)を追加
-# ruby addName2qgisKml.rb qgis.kml > newKml.kml
-
 require 'pp'
 
 data = <<EOS
