@@ -1,0 +1,22 @@
+addPhots2qgisKml.rb                                                                            
+addPhots2qgisKml.rb > /Users/hatanaka/Dropbox/シオハーク/geo2024/看板/yuza.kml                 
+geosite_csv2kml.rb                                                                             
+geojson_to_kml_rexml.rb /Users/hatanaka/Dropbox/qgis/2025-08-31_飛島/road.geojson /Users/hatana
+kml2csv4gmt.rb /Users/hatanaka/Downloads/1991〜1992\ 畠中\ 海外取材箇所.kml
+kml2csv4gmt.rb /Users/hatanaka/Downloads/1991〜1992\ 畠中\ 海外取材箇所.kml > place.csv
+kml2csv4yuza-spring.rb
+kml2csv4yuza-spring.rb > spring_kml.csv
+kml2csv4sign_yuza.rb chk
+kml2csv4sign_yuza.rb  
+kml2csv4sign_yuza.rb > /Users/hatanaka/Dropbox/qgis/2024-11-30_看板/協議会.csv
+kml2csvFromQgis.rb                                                                             
+kml2csvFromQgis.rb > /Users/hatanaka/Dropbox/シオハーク/geo2024/看板/sign.csv                  
+kml2geojson4umap.rb /Users/hatanaka/Dropbox/qgis/2025-11-28_電気伝導度分布図/遊佐町　湧水　地下
+kml2geojson4gsi.rb /Users/hatanaka/Dropbox/qgis/2025-11-28_電気伝導度分布図/遊佐町　湧水　地下.
+kml2geojson4qgis.rb /Users/hatanaka/Dropbox/qgis/2025-11-28_電気伝導度分布図/遊佐町　湧水　地下
+kml2geojson4umap.rb /Users/hatanaka/Dropbox/qgis/2025-07-25_水害/exoprt.kml
+mymapKmlStyle.rb /Users/hatanaka/Dropbox/シオハーク/geo2024/看板/2024_シオハーク看板調査_遊佐町
+qgisKml2Folder_photo_4Gmaps.rb                                                             
+qgisKml2Folder_photo_4Gmaps.rb > /Users/hatanaka/Dropbox/シオハーク/geo2024/看板/test.kml      
+qgisKml2Folder_photo_4Gmaps.rb /Users/hatanaka/Dropbox/シオハーク/geo2024/看板/2025-03-12.kml  
+geo_xls2mail.rb /Users/hatanaka/Dropbox/シオハーク/geo2025/2025-10-09_山本/version_202598144912
