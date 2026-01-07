@@ -28,11 +28,14 @@ headerCsv = "#{base_dir}/site_2024-10_h.csv"
 # outputType = :kml
 outputType = :geojson
 
-siteCsv = CsvTableUtil.new(inputFile)
-siteCsv.replaceHeaders(headerCsv)
+# siteCsv = CsvTableUtil.new(inputFile)
+replHeaders = CSV.read(headerCsv)[1]
+
+replTable = replaceHeaders(inputFile, replHeaders)
+
 # 出力する項目名
 # outputColumnsAry = [:name, :lat, :lon]
-siteCsvShort = siteCsv.selectTableCol([:name, :area, :公開, :lat, :lon, :temp_id])
+siteCsvShort = selectTableCol(replTable, [:name, :area, :lat, :lon, :temp_id])
 
 # メイン処理
 # if ARGV.length < 2
@@ -130,7 +133,7 @@ elsif outputType == :geojson
 	outputJsonAry = [outputJson1, outputJson2]
 	[locAry, nolocAry].each_with_index {|features, idx|
 		features4json = features.map {|feature|
-			{:type => 'Point', :coordinates => [feature[:lon], feature[:lat]], :properties => {'name' => feature[:name], 'description' => feature[:area], '公開' => booleanString2boolean(feature[:公開]), 'id' => feature[:temp_id]}}
+			{:type => 'Point', :coordinates => [feature[:lon], feature[:lat]], :properties => {'name' => feature[:name], 'description' => feature[:area], 'id' => feature[:temp_id]}}
 		}
 		jsonData = makeFeatureCollection(features4json)
 # GeoJSONをファイルに書き出し
