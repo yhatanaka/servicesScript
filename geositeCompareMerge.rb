@@ -7,9 +7,31 @@
 # require 'nkf'
 # require 'yaml'
 require 'pp'
-
+require 'optparse'
 require_relative 'CsvTableUtil.rb'
-require_relative 'placeFibonacci.rb'
+
+opt = OptionParser.new
+params = {}
+opt.on('--orig VAL') {|v| v }
+opt.on('--mod VAL') {|v| v }
+opt.parse!(ARGV, into: params)
+
+
+# p ARGV
+# p params
+base_dir = '/Users/hatanaka/Dropbox/ジオパーク/2024_サイト再設定/site_2024-10'
+origFile = "#{base_dir}/site_2024-10.csv"
+headerCsv = "#{base_dir}/site_2024-10_h.csv"
+
+siteCsv = CsvTableUtil.new(origFile)
+siteCsv.replaceHeaders(headerCsv)
+siteCsvShort = siteCsv.selectTableCol([:name, :area, :公開, :lat, :lon, :temp_id])
+pp siteCsvShort
+exit
+
+
+
+
 
 base_dir = '/Users/hatanaka/Dropbox/ジオパーク/2024_サイト再設定/site_2024-10'
 inputFile = "#{base_dir}/site_2024-10.csv"
@@ -23,16 +45,12 @@ outputKml2 = "#{base_dir}/site_2024-10_undicided.kml"
 outputJson1 = "#{base_dir}/site_2024-10.geojson"
 outputJson2 = "#{base_dir}/site_2024-10_undicided.geojson"
 
-headerCsv = "#{base_dir}/site_2024-10_h.csv"
 
 # outputType = :kml
 outputType = :geojson
 
-siteCsv = CsvTableUtil.new(inputFile)
-siteCsv.replaceHeaders(headerCsv)
 # 出力する項目名
 # outputColumnsAry = [:name, :lat, :lon]
-siteCsvShort = siteCsv.selectTableCol([:name, :area, :公開, :lat, :lon, :temp_id])
 
 # メイン処理
 # if ARGV.length < 2
@@ -130,7 +148,7 @@ elsif outputType == :geojson
 	outputJsonAry = [outputJson1, outputJson2]
 	[locAry, nolocAry].each_with_index {|features, idx|
 		features4json = features.map {|feature|
-			{:type => 'Point', :coordinates => [feature[:lon], feature[:lat]], :properties => {'name' => feature[:name], 'description' => feature[:area], '公開' => booleanString2boolean(feature[:公開]), 'id' => feature[:temp_id]}}
+			{:type => 'Point', :coordinates => [feature[:lon], feature[:lat]], :properties => {'name' => feature[:name], 'description' => feature[:area], 'id' => feature[:temp_id]}}
 		}
 		jsonData = makeFeatureCollection(features4json)
 # GeoJSONをファイルに書き出し

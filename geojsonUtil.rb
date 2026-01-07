@@ -52,6 +52,15 @@ def makeFeatureCollection(featuresAry)
 	# end
 end
 
+def booleanString2boolean(str)
+	if str == 'TRUE' || 'true'
+		return true
+	elsif str == 'FALSE' || 'false'
+		return false
+	else
+		return nil
+	end
+end
 =begin
 features = []
 styles = {}
