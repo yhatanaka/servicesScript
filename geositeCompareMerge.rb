@@ -20,13 +20,32 @@ opt.parse!(ARGV, into: params)
 # p ARGV
 # p params
 base_dir = '/Users/hatanaka/Dropbox/ジオパーク/2024_サイト再設定/site_2024-10'
+
 origFile = "#{base_dir}/site_2024-10.csv"
 headerCsv = "#{base_dir}/site_2024-10_h.csv"
 
-siteCsv = CsvTableUtil.new(origFile)
-siteCsv.replaceHeaders(headerCsv)
-siteCsvShort = siteCsv.selectTableCol([:name, :area, :公開, :lat, :lon, :temp_id])
-pp siteCsvShort
+modFile = "#{base_dir}/2026-01-07.csv"
+# マージするCSV (modFile) のヘッダを置き換えるヘッダ
+# 'name,description,id,Latitude,Longitude'
+# newHeadersStr = 'name,area,temp_id,Lat,Lon'
+# newHeaders = newHeadersStr.split(',').map {|n| n.to_sym}
+newHeaders = [:name, :area, :temp_id, :lat, :lon]
+
+replHeaders = CSV.read(headerCsv)[1]
+replOrigTable = replaceHeaders(origFile, replHeaders)
+shortHeadersAry = [:name, :area, :lat, :lon, :temp_id]
+siteCsvShort = selectTableCol(replOrigTable, shortHeadersAry)
+
+unpivotOrig = unpivot(siteCsvShort, [:temp_id])
+pp unpivotOrig
+pivotOrig = pivot(unpivotOrig, [:temp_id], shortHeadersAry)
+# pp pivotOrig
+
+replModTable = replaceHeaders(modFile, newHeaders)
+unpivotMod = unpivot(replModTable, [:temp_id])
+pivotMod = pivot(unpivotMod, [:temp_id], newHeaders)
+pp unpivotMod
+
 exit
 
 
@@ -62,33 +81,6 @@ outputType = :geojson
 # output_file = ARGV[1]
 
 
-# 座標がない場合、エリアごとに暫定的に置いとく
-areaCenter = <<-EOS
-由利本荘,39.4,139.95
-にかほ,39.25,139.85
-にかほ/遊佐,39.15,139.8
-遊佐,39.05,139.8
-酒田,38.95,139.75
-飛島,39.15,139.6
-EOS
-areaCenterHash = areaCenter.split("\n").each_with_object({}) {|area, loc|
-	areaAry = area.split(',')
-	loc[areaAry[0]] = [areaAry[1].to_f, areaAry[2].to_f]
-}
-
-if outputType == :kml
-	require_relative 'KmlUtil.rb'
-# KML の準備
-	doc1 = Document.new
-	doc1 << XMLDecl.new('1.0', 'UTF-8')
-	kml1 = doc1.add_element('kml', { 'xmlns' => 'http://www.opengis.net/kml/2.2' })
-	document1 = kml1.add_element('Document')
-	
-	doc2 = Document.new
-	doc2 << XMLDecl.new('1.0', 'UTF-8')
-	kml2 = doc2.add_element('kml', { 'xmlns' => 'http://www.opengis.net/kml/2.2' })
-	document2 = kml2.add_element('Document')
-end
 
 locAry = []
 nolocAry = []
@@ -102,14 +94,6 @@ siteCsvShort.each do |feature|
 			else
 				nolocHash[feature[:area]] += 1
 			end
-# "由利本荘" => 18
-# "にかほ" => 20
-# "にかほ/遊佐" => 1
-# "遊佐" => 13
-# "酒田" => 12
-# "飛島" => 5
-# placeFibonacci
-# KmlUtil
 			distStep = 0.004 # 各点、おおよそこの4倍くらい離れる
 			noLocPlaceAry = placeFibonacci(areaCenterHash[feature[:area]], nolocHash[feature[:area]]-1, distStep)
 			feature[:lat] = noLocPlaceAry[0]
@@ -161,15 +145,3 @@ elsif outputType == :geojson
 		puts "Feature数: #{features.size}"
 	}
 end
-# outputJson1
-
-=begin
-#pp doc.root
-XPath.each(doc, '//Placemark'){|xmlelement|
-#p YAML::dump( xmlelement.elements)
-p(xmlelement.elements['name'].text)
-p(xmlelement.elements['Point/coordinates'].text)
-}
-#p YAML::dump(item)
-#p YAML::dump( xmlelement.elements)
-=end
