@@ -12,7 +12,7 @@ require_relative 'CsvTableUtil.rb'
 require_relative 'placeFibonacci.rb'
 
 base_dir = '/Users/hatanaka/Dropbox/ジオパーク/2024_サイト再設定/site_2024-10'
-inputFile = "#{base_dir}/site_2024-10.csv"
+inputFile = "#{base_dir}/2026-01-09_orig.csv"
 # inputFile = ARGV.shift
 # formatFile = '/Users/hatanaka/Dropbox/ジオパーク/geosite_format.kml'
 # formatFile = ARGV.shift
@@ -97,10 +97,12 @@ siteCsvShort.each do |feature|
 # KmlUtil
 			distStep = 0.004 # 各点、おおよそこの4倍くらい離れる
 			noLocPlaceAry = placeFibonacci(areaCenterHash[feature[:area]], nolocHash[feature[:area]]-1, distStep)
-			feature[:lat] = noLocPlaceAry[0]
-			feature[:lon] = noLocPlaceAry[1]
+			feature[:lat] = noLocPlaceAry[0].round(5)
+			feature[:lon] = noLocPlaceAry[1].round(5)
 				nolocAry << feature
 		else
+			feature[:lat] = feature[:lat].round(5)
+			feature[:lon] = feature[:lon].round(5)
 				locAry << feature
 		end
 	end
