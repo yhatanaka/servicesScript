@@ -10,7 +10,7 @@ require 'csv'
 	# end
 	
 	def origTable(inputCsv)
-		origTable = CSV.read(inputCsv, headers: true, header_converters: :symbol_raw)
+		origTable = CSV.table(inputCsv, headers: true, header_converters: :symbol_raw)
 		return origTable
 	end
 	
@@ -38,11 +38,10 @@ require 'csv'
 		replConverter = lambda { |h| replHeaders_dict[h] }
 		
 		# CSV.table だけだと日本語表示されないので、option つける
-		repTable = CSV.read(inputCsv, headers: true, header_converters: [replConverter, :symbol_raw])
+		repTable = CSV.table(inputCsv, headers: true, header_converters: [replConverter, :symbol_raw])
 		return repTable
 	end
-	# dataTable = CSV.table(inputFile, header_converters: :symbol_raw)
-	# dataTable = CSV.read(inputFile)
+
 	def selectTableCol(aTable, colAry)
 		# 出力する項目名
 		outputColumnsAry = colAry
@@ -149,11 +148,24 @@ end
 
 # 配列の配列と、ヘッダの配列から、CSV::table へ変換
 def makeTable(headersAry, bodyAryOfAry)
-	bodyRowAry = []
+	bodyRowsAry = []
 	bodyAryOfAry.each {|bodyRow|
-		bodyRowAry << CSV::Row.new(headersAry, bodyRow)
+		bodyRowsAry << CSV::Row.new(headersAry, bodyRow)
 	}
-	return CSV::Table.new(bodyRowAry)
+	return CSV::Table.new(bodyRowsAry)
+end
+
+# Hashの配列と、ヘッダの配列から、CSV::table へ変換
+def makeTableByHash(headersAry, bodyAryOfHash)
+	bodyRowsAry = []
+	bodyAryOfHash.each {|bodyRow|
+		bodyItemAry = []
+		headersAry.each {|aHeader|
+			bodyItemAry << bodyRow[aHeader]
+		}
+		bodyRowsAry << CSV::Row.new(headersAry, bodyItemAry)
+	}
+	return CSV::Table.new(bodyRowsAry)
 end
 
 # 縦持ちのTableから横持ちのTableに
@@ -214,4 +226,25 @@ def data2PivotedTable(keysHash, headersAry = nil)
 
 	newHeaders = pivotedHeadersName
 	return makeTable(newHeaders, resultAry)
+end
+
+def diffData(bfrData, aftData)
+# 付け加えられた行、変更された行、元の方にしかない行
+	newRowAry = []
+	modRowAry = []
+	deletedRowAry = []
+	aftData.each {|keyHash, itemHash|
+		if bfrData[keyHash] # 元のデータにあるもの
+			if itemHash != bfrData[keyHash]
+				modRowAry << keyHash.merge(itemHash)
+			end
+			bfrData.delete(keyHash)
+		else # 付け加えられた行
+			newRowAry << keyHash.merge(itemHash)
+		end
+	}
+	bfrData.each {|keyHash, itemHash|
+		deletedRowAry << keyHash.merge(itemHash)
+	}
+	return {:deleted => deletedRowAry, :new => newRowAry, :mod => modRowAry} # old はHash, 残りはArray
 end
