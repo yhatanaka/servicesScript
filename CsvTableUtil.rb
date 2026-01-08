@@ -97,41 +97,56 @@ require 'csv'
 
 
 # 縦持ちにした時の、key 項目以外のヘッダ名
-@unpivotedExtraHeaders = [:key, :value]
-# 縦持ちに
+@unpivotedExtraHeaders = [:otherKey, :otherKeysValue]
+# 横持ちのTableを縦持ちのTableに
 def unpivot(table, keysAry)
+	dataHash = pivotedTable2Data(table, keysAry)
+	return data2UnpivotedTable(dataHash, keysAry)
+end
+
+# 横持ちのTableからDataに
+def pivotedTable2Data(table, keysAry)
+# 中間データ
+	outputRowDataHash = {}
+
+	table.each {|row|
+# この行の key 項目のデータを入れる
+		keyColsHash = {}
+		rowHash = row.to_h
+# key 項目それぞれで…
+		keysAry.each {|aKey|
+# key 項目のデータを格納し…
+			keyColsHash[aKey] = rowHash[aKey]
+# 格納したら行のデータからは削除
+			rowHash.delete(aKey)
+		}
+		outputRowDataHash[keyColsHash] = rowHash
+	}
+	return outputRowDataHash
+# pp outputRowDataHash
+end
+
+# Dataから縦持ちのTableに
+def data2UnpivotedTable(outputRowDataHash, keysAry)
 # 縦持ちのヘッダ、(keysAry の各項目), unpivotedExtraHeaders
 	newHeadersAry = keysAry + @unpivotedExtraHeaders
 # 最終的なデータ
 	outputRowsAry = []
-
-	table.each {|row|
-# この行の key 項目のデータを入れる
-		keyCols = []
-		rowHash = row.to_h
-# key 項目それぞれで…
-		keysAry.each {|keyHeader|
-# key 項目のデータを格納し…
-			keyCols << rowHash[keyHeader]
-# 格納したら行のデータからは削除
-			rowHash.delete(keyHeader)
-		}
+	outputRowDataHash.each {|keyHash, itemHash|
 # 残ったもの、つまり行の key 項目「以外」のヘッダ名と値を…
-		rowHash.each {|key, value|
+		itemHash.each {|key, value|
 # 値が nil でなければ
 			if value
-				outputRow = []
-# ヘッダ名と値を…
-				outputRow.push(key,value)
-# key 項目に続けて、1行できあがり
-				outputRowsAry << keyCols + outputRow
+# 「key 項目、ヘッダ名、値」で1行できあがり
+# Hash.keys/values は追加した順番に出力される
+				outputRowsAry << keyHash.values + [key, value]
 			end
 		}
 	}
-#	pp keysAry.push(:key)
 # 行のデータと、ヘッダから table 作る
 	return makeTable(newHeadersAry, outputRowsAry)
 end
+
 # 配列の配列と、ヘッダの配列から、CSV::table へ変換
 def makeTable(headersAry, bodyAryOfAry)
 	bodyRowAry = []
@@ -141,19 +156,15 @@ def makeTable(headersAry, bodyAryOfAry)
 	return CSV::Table.new(bodyRowAry)
 end
 
-# 横持ちに
+# 縦持ちのTableから横持ちのTableに
 def pivot(table, keysAry, headersAry = nil)
-	# rowsAry = []
-	keysHash = {}
+	dataHash = unpivotedTable2Data(table, keysAry)
+	return data2PivotedTable(dataHash, headersAry)
+end
 
-	if headersAry  # headersAry 指定すると、その順番に列を出力
-		pivotedHeadersName = headersAry
-	else  # 指定されなければ…
-# 横持ちの場合の key 以外の項目名
-		extraPivotedHeadersName = table[:key].uniq
-# 最終的なヘッダは、key 項目 + (:key 列のuniq)
-		pivotedHeadersName = keysAry + extraPivotedHeadersName
-	end
+# 縦持ちのTableからDataに
+def unpivotedTable2Data(table, keysAry)
+	keysHash = {}
 
 # 行ごとに…
 	table.each {|row|
@@ -169,24 +180,34 @@ def pivot(table, keysAry, headersAry = nil)
 		}
 # この key 項目は初めて出たんなら、追加のデータ入れる準備
 		unless keysHash[thisRowKeysHash]
-			keysHash[thisRowKeysHash] = thisRowKeysHash.dup
+			keysHash[thisRowKeysHash] = {}
 		end
 
 # 残りのヘッダは、unpivotedExtraHeaders
-# {["おれ", "今日"] => {昼食: "ラーメン", 夕食: "牛丼"},
-# ["おれ", "昨日"] => {朝食: "梅干しご飯", おやつ: "ポテチ", 夕食: "ラーメン"},
-# ["おれ", "一昨日"] => {朝食: "食パン", 昼食: "焼き魚定食", 夕食: "麻婆豆腐定食"},
-# …}
-		keysHash[thisRowKeysHash][rowHash[:key]] = rowHash[:value]
+# {{:名前=>"おれ", :年月日=>"今日"}=>{:昼食=>"ラーメン", :夕食=>"牛丼"},
+#  {:名前=>"おれ", :年月日=>"昨日"}=>{:朝食=>"梅干しご飯", :おやつ=>"ポテチ", :夕食=>"ラーメン"},
+#  ...}
+		keysHash[thisRowKeysHash][rowHash[@unpivotedExtraHeaders[0]]] = rowHash[@unpivotedExtraHeaders[1]]
 	}
+	return keysHash
+end
 
-	resultAry = keysHash.each_with_object([]) {|(prmKeys, itemHash), newAry|
+# Dataから横持ちのTableに
+def data2PivotedTable(keysHash, headersAry = nil)
+	if headersAry  # headersAry 指定すると、その順番に列を出力
+		pivotedHeadersName = headersAry
+	else  # 指定されなければ…
+# 横持ちの場合の key 以外の項目名
+		extraPivotedHeadersName = table[@unpivotedExtraHeaders[0]].uniq
+# 最終的なヘッダは、key 項目 + (:key 列のuniq)
+		pivotedHeadersName = keysAry + extraPivotedHeadersName
+	end
+
+	resultAry = keysHash.each_with_object([]) {|(keysHash, itemHash), newAry|
 		rowAry = []
-		# pivotedHeadersName.each {|extraKey|
-		# 	rowAry << extraHash[extraKey]
-		# }
+		mergedHash = keysHash.merge(itemHash)
 		rowAry = pivotedHeadersName.map {|key|
-			itemHash[key]
+			mergedHash[key]
 		}
 		newAry << rowAry
 	}
