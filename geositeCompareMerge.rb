@@ -54,7 +54,7 @@ modData = pivotedTable2Data(modTbl, keysAry)
 dataDiff = diffData(origData, modData)
 dataDiff.each {|key, value|
 	p key
-	pp makeTableByHash(newHeaderAry, value)[2]
+	pp makeTableByHash(newHeaderAry, value).to_csv
 }
 
 =begin
