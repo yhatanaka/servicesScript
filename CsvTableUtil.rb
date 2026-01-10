@@ -96,7 +96,7 @@ require 'csv'
 
 
 # 縦持ちにした時の、key 項目以外のヘッダ名
-@unpivotedExtraHeaders = [:otherKey, :otherKeysValue]
+$unpivotedExtraHeaders = [:otherKey, :otherKeysValue]
 # 横持ちのTableを縦持ちのTableに
 def unpivot(table, keysAry)
 	dataHash = pivotedTable2Data(table, keysAry)
@@ -128,7 +128,7 @@ end
 # Dataから縦持ちのTableに
 def data2UnpivotedTable(outputRowDataHash, keysAry)
 # 縦持ちのヘッダ、(keysAry の各項目), unpivotedExtraHeaders
-	newHeadersAry = keysAry + @unpivotedExtraHeaders
+	newHeadersAry = keysAry + $unpivotedExtraHeaders
 # 最終的なデータ
 	outputRowsAry = []
 	outputRowDataHash.each {|keyHash, itemHash|
@@ -199,7 +199,7 @@ def unpivotedTable2Data(table, keysAry)
 # {{:名前=>"おれ", :年月日=>"今日"}=>{:昼食=>"ラーメン", :夕食=>"牛丼"},
 #  {:名前=>"おれ", :年月日=>"昨日"}=>{:朝食=>"梅干しご飯", :おやつ=>"ポテチ", :夕食=>"ラーメン"},
 #  ...}
-		keysHash[thisRowKeysHash][rowHash[@unpivotedExtraHeaders[0]]] = rowHash[@unpivotedExtraHeaders[1]]
+		keysHash[thisRowKeysHash][rowHash[$unpivotedExtraHeaders[0]].to_sym] = rowHash[$unpivotedExtraHeaders[1]]
 	}
 	return keysHash
 end
@@ -210,7 +210,7 @@ def data2PivotedTable(keysHash, headersAry = nil)
 		pivotedHeadersName = headersAry
 	else  # 指定されなければ…
 # 横持ちの場合の key 以外の項目名
-		extraPivotedHeadersName = table[@unpivotedExtraHeaders[0]].uniq
+		extraPivotedHeadersName = table[$unpivotedExtraHeaders[0]].uniq
 # 最終的なヘッダは、key 項目 + (:key 列のuniq)
 		pivotedHeadersName = keysAry + extraPivotedHeadersName
 	end
@@ -238,6 +238,10 @@ def diffData(bfrData, aftData)
 			if itemHash != bfrData[keyHash]
 				modRowAry << keyHash.merge(itemHash)
 			end
+			# itemHash.each {|itemKey, itemValue|
+			# 	bfrData[keyHash][itemKey] 
+			# }
+			# 	modRowAry << keyHash.merge(itemHash)
 			bfrData.delete(keyHash)
 		else # 付け加えられた行
 			newRowAry << keyHash.merge(itemHash)
