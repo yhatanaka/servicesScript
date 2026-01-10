@@ -15,10 +15,11 @@ if actualTestFlag
 	require 'minitest/autorun' # Minitest ライブラリを読み込む
 else
 	base_dir = '/Users/hatanaka/Documents/servicesScript/csv_test'
-	inputFile1 = "#{base_dir}/1-test_1.csv"
-	pp :test
-	pp :test.to_s
-	pp :test.to_sym
+		inputFileCompoKeyPivot = "#{base_dir}/2-test_n.csv" # 複合キー
+		tbl = origTable(inputFileCompoKeyPivot)
+		data = pivotedTable2Data(tbl, [:名前, :年月日])
+		pp pivot(unpivotReplTbl, ['名前', :年月日]) # Data -> 横持ち
+		# inputFileCompoKeyPivot
 	exit
 
 end
@@ -57,14 +58,16 @@ EOS
 		inputFile2 = "#{base_dir}/1-test_2.csv" # Data -> 縦持ち
 		assert_equal dataH, unpivotedTable2Data(origTable(inputFile2), [:番号]) # 縦持ち -> Data
 		assert_equal origTblStr, data2PivotedTable(dataH, ["番号", "氏名", "年齢", "変なヤツ"]).to_csv # Data -> 横持ち
+		assert_equal origTblStr, data2PivotedTable(dataH).to_csv # Data -> 横持ち
 
-		inputFileCompoKeyPivot = "#{base_dir}/2-test_n.csv" # 複合キー
-		inputFileCompoKeyUnpivot = "#{base_dir}/2-test_n+1.csv" # 複合キー
+		inputFileCompoKeyPivot = "#{base_dir}/1-test_n.csv" # 複合キー
+		inputFileCompoKeyUnpivot = "#{base_dir}/1-test_n+1.csv" # 複合キー
 		assert_equal replaceHeaders(inputFileCompoKeyUnpivot,[nil,nil,'otherKey','otherKeysValue']).to_s, unpivot(origTable(inputFileCompoKeyPivot), ['名前', '年月日']).to_s # 横 -> 縦
 
 		unpivotReplTbl = replaceHeaders(inputFileCompoKeyUnpivot,[nil,nil,:otherKey,:otherKeysValue]) # 縦 -> 横
 		assert_equal origTable(inputFileCompoKeyPivot), pivot(unpivotReplTbl, ['名前', :年月日], headersAry = [:名前, '年月日', :朝食, :昼食, :おやつ, :夕食]) # 縦 -> 横
-		assert_equal origTable(inputFileCompoKeyPivot), pivot(unpivotReplTbl, ['名前', :年月日]) # 縦 -> 横
+		inputFileCompoKeyPivot2 = "#{base_dir}/1-test_n2.csv" # 複合キー 列は、出現順に並ぶ header 指定なし
+		assert_equal origTable(inputFileCompoKeyPivot2), pivot(unpivotReplTbl, ['名前', :年月日]) # 縦 -> 横
 
 	end
 	
