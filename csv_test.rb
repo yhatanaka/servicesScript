@@ -70,12 +70,16 @@ EOS
 		assert_equal origTable(inputFileCompoKeyPivot2), pivot(unpivotReplTbl, ['名前', :年月日]) # 縦 -> 横
 
 	end
-	
-	# def test_diff
-	# 	base_dir = '/Users/hatanaka/Documents/servicesScript/csv_test'
-	# 	inputFile1 = "#{base_dir}/1-test_1.csv"
-	# 	inputFile2 = "#{base_dir}/1-test_1.csv"
-	# end
+
+	def test_diff
+		base_dir = '/Users/hatanaka/Documents/servicesScript/csv_test'
+		inputFile1 = "#{base_dir}/1-test_1.csv"
+		inputFile2 = "#{base_dir}/1-test_3.csv"
+		data1 = pivotedTable2Data(origTable(inputFile1), [:番号])
+		data2 = pivotedTable2Data(origTable(inputFile2), [:番号])
+		ret = {deleted: [{番号: 3, 氏名: "南野　誰某", 年齢: 43, 変なヤツ: "TRUE"}], new: [{番号: 4, 氏名: "誰田　是葉", 年齢: 34, 変なヤツ: "FALSE"}], mod: [{番号: 2, 氏名: "普通　野子", 年齢: 29, 変なヤツ: "FALSE"}]}
+		assert_equal ret, diffData(data1, data2)
+	end
 end
 exit
 
