@@ -211,11 +211,18 @@ def data2PivotedTable(dataHash, headersAry = nil)
 		pivotedHeadersName = headersAry.map{|n| n.to_sym}
 	else  # 指定されなければ…
 # 横持ちの場合の key 以外の項目名
-		extraPivotedHeadersName = table[$unpivotedExtraHeaders[0]].uniq
+		extraPivotedHeadersAry = dataHash.each_with_object([]) {|(keysHash, itemHash), newAry|
+			newAry << itemHash.keys
+		}
+		extraPivotedHeadersName = extraPivotedHeadersAry.flatten.uniq
+# 最初のkey, item
+# [{名前: "おれ", 年月日: "今日"}, {朝食: nil, 昼食: "ラーメン", おやつ: nil, 夕食: "牛丼"}]
+		firstHash = dataHash.each { |n| break n }
 # 最終的なヘッダは、key 項目 + (:key 列のuniq)
-		pivotedHeadersName = keysAry + extraPivotedHeadersName
+		pivotedHeadersName = firstHash[0].keys + extraPivotedHeadersName
 	end
 
+	itemKeyAry = []
 	resultAry = dataHash.each_with_object([]) {|(keysHash, itemHash), newAry|
 		rowAry = []
 		mergedHash = keysHash.merge(itemHash)
