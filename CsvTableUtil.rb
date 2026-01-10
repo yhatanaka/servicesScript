@@ -205,7 +205,7 @@ def unpivotedTable2Data(table, keysAry)
 end
 
 # Dataから横持ちのTableに
-def data2PivotedTable(keysHash, headersAry = nil)
+def data2PivotedTable(dataHash, headersAry = nil)
 	if headersAry  # headersAry 指定すると、その順番に列を出力
 		pivotedHeadersName = headersAry
 	else  # 指定されなければ…
@@ -215,7 +215,7 @@ def data2PivotedTable(keysHash, headersAry = nil)
 		pivotedHeadersName = keysAry + extraPivotedHeadersName
 	end
 
-	resultAry = keysHash.each_with_object([]) {|(keysHash, itemHash), newAry|
+	resultAry = dataHash.each_with_object([]) {|(keysHash, itemHash), newAry|
 		rowAry = []
 		mergedHash = keysHash.merge(itemHash)
 		rowAry = pivotedHeadersName.map {|key|
@@ -223,7 +223,6 @@ def data2PivotedTable(keysHash, headersAry = nil)
 		}
 		newAry << rowAry
 	}
-
 	newHeaders = pivotedHeadersName
 	return makeTable(newHeaders, resultAry)
 end
