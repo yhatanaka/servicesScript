@@ -54,6 +54,7 @@ EOS
 		assert_equal unpivotTblStr, unpivot(origTable(inputFile1), [:番号]).to_s # 横持ち -> 縦持ち
 		inputFile2 = "#{base_dir}/1-test_2.csv" # Data -> 縦持ち
 		assert_equal dataH, unpivotedTable2Data(origTable(inputFile2), [:番号]) # 縦持ち -> Data
+		assert_equal origTblStr, data2PivotedTable(dataH, ["番号", "氏名", "年齢", "変なヤツ"].map{|n| n.to_sym}).to_csv # Data -> 横持ち
 	end
 	
 	# def test_diff
