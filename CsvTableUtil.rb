@@ -44,7 +44,7 @@ require 'csv'
 
 	def selectTableCol(aTable, colAry)
 		# 出力する項目名
-		outputColumnsAry = colAry
+		outputColumnsAry = colAry.map {|n| n.to_sym}
 		# それ以外を削除したCSV Table
 		dataTable = aTable.by_col.select {|header, value|
 			outputColumnsAry.include?(header)
@@ -113,7 +113,7 @@ def pivotedTable2Data(table, keysAry)
 		keyColsHash = {}
 		rowHash = row.to_h
 # key 項目それぞれで…
-		keysAry.each {|aKey|
+		keysAry.map{|n| n.to_sym}.each {|aKey|
 # key 項目のデータを格納し…
 			keyColsHash[aKey] = rowHash[aKey]
 # 格納したら行のデータからは削除
@@ -128,7 +128,7 @@ end
 # Dataから縦持ちのTableに
 def data2UnpivotedTable(outputRowDataHash, keysAry)
 # 縦持ちのヘッダ、(keysAry の各項目), unpivotedExtraHeaders
-	newHeadersAry = keysAry + $unpivotedExtraHeaders
+	newHeadersAry = keysAry.map{|n| n.to_sym} + $unpivotedExtraHeaders
 # 最終的なデータ
 	outputRowsAry = []
 	outputRowDataHash.each {|keyHash, itemHash|
@@ -184,7 +184,8 @@ def unpivotedTable2Data(table, keysAry)
 # この行の key 項目を入れる準備
 		thisRowKeysHash = {}
 # key 項目ごとに…
-		keysAry.each {|key|
+		keysAry.map{|n| n.to_sym}.each {|key|
+			keySym = 
 # この行から拾って入れる
 			thisRowKeysHash[key] = rowHash[key]
 # 入れたら元の行データからは削除
@@ -207,7 +208,7 @@ end
 # Dataから横持ちのTableに
 def data2PivotedTable(dataHash, headersAry = nil)
 	if headersAry  # headersAry 指定すると、その順番に列を出力
-		pivotedHeadersName = headersAry
+		pivotedHeadersName = headersAry.map{|n| n.to_sym}
 	else  # 指定されなければ…
 # 横持ちの場合の key 以外の項目名
 		extraPivotedHeadersName = table[$unpivotedExtraHeaders[0]].uniq
