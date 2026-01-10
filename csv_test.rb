@@ -33,12 +33,12 @@ class CsvTableUtilTest < Minitest::Test # CsvTableUtilTest クラスを定義、
 3,南野　誰某,43,TRUE
 EOS
 		assert_equal origTblStr, origTable(inputFile1).to_s
-		assert_equal "番号,氏名,年齢,変なヤツ\n" + "1,名無　権兵衛,51,TRUE\n" + "2,普通　野子,30,FALSE\n" + "3,南野　誰某,43,TRUE\n", origTable(inputFile1).to_s
-		assert_equal ["番号", "氏名", "年齢", "変なヤツ"], origHeader(inputFile1)
-		assert_equal "番号,name,年齢,idiot\n" + "1,名無　権兵衛,51,TRUE\n" + "2,普通　野子,30,FALSE\n" + "3,南野　誰某,43,TRUE\n", replaceHeaders(inputFile1, [nil,'name',nil,'idiot']).to_s
-		assert_equal "番号,氏名\n1,名無　権兵衛\n2,普通　野子\n3,南野　誰某\n", selectTableCol(origTable(inputFile1), [:番号, :氏名]).to_s
-		dataH = {{番号: 1} => {氏名: '名無　権兵衛', 年齢: 51, 変なヤツ: 'TRUE'}, {番号: 2} => {氏名: '普通　野子', 年齢: 30, 変なヤツ: 'FALSE'}, {番号: 3} => {氏名: '南野　誰某', 年齢: 43, 変なヤツ: 'TRUE'}}
-		assert_equal dataH, pivotedTable2Data(origTable(inputFile1), [:番号])
+		assert_equal "番号,氏名,年齢,変なヤツ\n" + "1,名無　権兵衛,51,TRUE\n" + "2,普通　野子,30,FALSE\n" + "3,南野　誰某,43,TRUE\n", origTable(inputFile1).to_s # 読み込み
+		assert_equal ["番号", "氏名", "年齢", "変なヤツ"], origHeader(inputFile1) # ヘッダ
+		assert_equal "番号,name,年齢,idiot\n" + "1,名無　権兵衛,51,TRUE\n" + "2,普通　野子,30,FALSE\n" + "3,南野　誰某,43,TRUE\n", replaceHeaders(inputFile1, [nil,'name',nil,'idiot']).to_s # ヘッダ置換
+		assert_equal "番号,氏名\n1,名無　権兵衛\n2,普通　野子\n3,南野　誰某\n", selectTableCol(origTable(inputFile1), [:番号, :氏名]).to_s # 特定のヘッダのみ
+		dataH = {{番号: 1} => {氏名: '名無　権兵衛', 年齢: 51, 変なヤツ: 'TRUE'}, {番号: 2} => {氏名: '普通　野子', 年齢: 30, 変なヤツ: 'FALSE'}, {番号: 3} => {氏名: '南野　誰某', 年齢: 43, 変なヤツ: 'TRUE'}} # Data
+		assert_equal dataH, pivotedTable2Data(origTable(inputFile1), [:番号]) # 横持ち -> Data
 		unpivotTblStr = <<EOS
 番号,otherKey,otherKeysValue
 1,氏名,名無　権兵衛
@@ -51,9 +51,9 @@ EOS
 3,年齢,43
 3,変なヤツ,TRUE
 EOS
-		assert_equal unpivotTblStr, unpivot(origTable(inputFile1), [:番号]).to_s
-		inputFile2 = "#{base_dir}/1-test_2.csv" # 縦持ち
-		assert_equal dataH, unpivotedTable2Data(origTable(inputFile2), [:番号]) 
+		assert_equal unpivotTblStr, unpivot(origTable(inputFile1), [:番号]).to_s # 横持ち -> 縦持ち
+		inputFile2 = "#{base_dir}/1-test_2.csv" # Data -> 縦持ち
+		assert_equal dataH, unpivotedTable2Data(origTable(inputFile2), [:番号]) # 縦持ち -> Data
 	end
 	
 	# def test_diff
