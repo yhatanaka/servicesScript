@@ -58,12 +58,13 @@ def convert_to_table(text, pickDepthAry)
 	
 	# 現在の階層パスを保持する配列
 	current_path = []
+# [[調査地1, 種1], [調査地1, 種2], ... [調査地n, 種m]]
+	locSpeciesAryInAry = []
 
 	lines.each_with_index do |line, index|
 		# 行頭のタブの数を数えて階層の深さ(depth)とする
 		depth = line[/\A\t*/].size
 		content = line.strip
-
 		if pickDepthAry[depth]
 			# その深さに対応する位置(pickDepthAry)に現在の項目をセットする
 			current_path[pickDepthAry[depth]] = content
@@ -92,15 +93,17 @@ def convert_to_table(text, pickDepthAry)
 		else
 			next
 		end
-		# 末端の場合のみ、パスをタブ区切りで結合して出力
+		# 末端の場合のみ、locSpeciesAryInAry に current_path 追加
 		if is_leaf
-			puts current_path.join("\t")
+			locSpeciesAryInAry << current_path
+			# puts current_path.join("\t")
 		end
 	end
+	return locSpeciesAryInAry
 end
 
 pickData = File.read(pickFile)
-convert_to_table(pickData, pickDepthAry)
+pp convert_to_table(pickData, pickDepthAry)
 # 例外は小さい単位で捕捉する
 rescue SystemCallError => e
   puts %Q(class=[#{e.class}] message=[#{e.message}])
