@@ -64,8 +64,8 @@ def convert_to_table(text, pickDepthAry)
 	lines.each_with_index do |line, index|
 		# 行頭のタブの数を数えて階層の深さ(depth)とする
 		depth = line[/\A\t*/].size
-		content = line.strip
 		if pickDepthAry[depth]
+			content = line.strip
 			# その深さに対応する位置(pickDepthAry)に現在の項目をセットする
 			current_path[pickDepthAry[depth]] = content
 			
@@ -73,25 +73,21 @@ def convert_to_table(text, pickDepthAry)
 			current_path = current_path[0..pickDepthAry[depth]]
 	
 			# --- ここから「葉（末端）」かどうかの判定 ---
-			
-			# 次の行を取得（なければnil）
-			next_line = lines[index + 1]
-			is_leaf = false
-	
-			if next_line.nil?
-				# 次の行がない＝最後の行なので末端
-				is_leaf = true
-			else
-				# 次の行のインデントを調べる
-				next_depth = next_line[/\A\t*/].size
-				
-				# 次の行が現在の行より深くない（同じか浅い）場合、現在の行は末端
-				if next_depth <= depth
-					is_leaf = true
-				end
-			end
+		end
+		# 次の行を取得（なければnil）
+		next_line = lines[index + 1]
+		is_leaf = false
+		if next_line.nil?
+			# 次の行がない＝最後の行なので末端
+			is_leaf = true
 		else
-			next
+			# 次の行のインデントを調べる
+			next_depth = next_line[/\A\t*/].size
+			
+			# 次の行が現在の行より深くない（同じか浅い）場合、現在の行は末端
+			if next_depth <= depth
+				is_leaf = true
+			end
 		end
 		# 末端の場合のみ、locSpeciesAryInAry に current_path 追加
 		if is_leaf
@@ -110,4 +106,3 @@ rescue SystemCallError => e
 rescue IOError => e
   puts %Q(class=[#{e.class}] message=[#{e.message}])
 end
-exit
