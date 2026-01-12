@@ -91,7 +91,8 @@ def convert_to_table(text, pickDepthAry)
 		end
 		# 末端の場合のみ、locSpeciesAryInAry に current_path 追加
 		if is_leaf
-			locSpeciesAryInAry << current_path
+# 配列に追加した値が、その後の処理中に変化しないよう、dup してから追加
+			locSpeciesAryInAry << current_path.dup
 			# puts current_path.join("\t")
 		end
 	end
