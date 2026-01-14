@@ -99,6 +99,14 @@ def convert_to_table(text, pickDepthAry)
 	return locSpeciesAryInAry
 end
 
+def makeSp2LocHash(locSpArys)
+	retHash = {}
+	locSpArys.each {|aLocSpAry|
+		
+	}
+	return retHash
+end
+
 pickData = File.read(pickFile)
 pp convert_to_table(pickData, pickDepthAry)
 # 例外は小さい単位で捕捉する
