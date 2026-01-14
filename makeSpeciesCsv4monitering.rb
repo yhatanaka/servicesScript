@@ -127,6 +127,16 @@ def checkDupSpList(tbl)
 	return ret
 end
 
+# tbl の種名 spName の行番号(1〜)を返す
+def whereSpList(tbl, spName)
+	ret = []
+	tbl.each_with_index {|row, idx|
+		if row[:種] == spName
+			ret << idx + 1
+		end
+	}
+	ret
+end
 
 pickData = File.read(pickFile)
 pp locSpArys(pickData, pickDepthAry)
