@@ -47,5 +47,9 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		spNodupTbl = origTable(fromFile_nodup)
 		assert_equal [], checkDupSpList(spNodupTbl)
 
+# 最終データ
+		ret3 = []
+		assert_equal ret3, makeSpLocTbl(locSpHash, spTbl、locAry)
+
 	end
 end

@@ -138,6 +138,11 @@ def whereSpList(tbl, spName)
 	ret
 end
 
+# 調査リストのデータ (makeSp2LocHash) から、種名, 調査地1, 調査地2, ... , RDBランク(県, 国)
+def makeSpLocTbl(locSpHash, spTbl、locAry)
+	ret = []
+end
+
 pickData = File.read(pickFile)
 pp locSpArys(pickData, pickDepthAry)
 # 例外は小さい単位で捕捉する
