@@ -30,9 +30,9 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		pickDepthAry = [0,nil,1]
 		fromFile = "#{base_dir}/spList.csv"
 		ret01Ary = [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイバゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'モリアオガエル'], ['ハッチョウ', 'ハッチョウトンボ']]
-		assert_equal ret01Ary, convert_to_table(File.read(pickFile), pickDepthAry)
+		assert_equal ret01Ary, convert2LocSpArys(File.read(pickFile), pickDepthAry)
 		ret2Hash = {'モノサシトンボ' => ['泥沢'], 'コバネイバゴ' => ['泥沢'], 'モリアオガエル' => ['藤井公園', 'ハッチョウ'], 'カナヘビ' => ['藤井公園'], 'ハッチョウトンボ' => ['ハッチョウ']}
 		# assert_equal ret2Hash, makeSp2LocHash(ret01Ary)
-		assert_equal ret2Hash, makeSp2LocHash(convert_to_table(File.read(pickFile), pickDepthAry))
+		assert_equal ret2Hash, makeSp2LocHash(convert2LocSpArys(File.read(pickFile), pickDepthAry))
 	end
 end

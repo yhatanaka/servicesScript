@@ -52,7 +52,7 @@ fromFile = '/Users/hatanaka/Dropbox/モニタリング調査/モニタリン�
 
 begin
 # 処理ロジック
-def convert_to_table(text, pickDepthAry)
+def convert2LocSpArys(text, pickDepthAry)
 	# 空行を除去して行ごとの配列にする
 	lines = text.lines.map(&:chomp).reject(&:empty?)
 	
@@ -115,7 +115,7 @@ def makeSp2LocHash(locSpArys)
 end
 
 pickData = File.read(pickFile)
-pp convert_to_table(pickData, pickDepthAry)
+pp convert2LocSpArys(pickData, pickDepthAry)
 # 例外は小さい単位で捕捉する
 rescue SystemCallError => e
   puts %Q(class=[#{e.class}] message=[#{e.message}])
