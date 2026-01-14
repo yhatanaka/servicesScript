@@ -30,13 +30,13 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		pickDepthAry = [0,nil,1]
 		fromFile = "#{base_dir}/spList.csv"
 # 階層1,階層3を読み込む
-		ret01Ary = [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイバゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'モリアオガエル'], ['ハッチョウ', 'ハッチョウトンボ']]
+		ret01Ary = [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイナゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'モリアオガエル'], ['ハッチョウ', 'ハッチョウトンボ']]
 # 調査結果
 		researchList = File.read(pickFile)
 		resLocSpArys = locSpArys(researchList, pickDepthAry)
 		assert_equal ret01Ary, resLocSpArys
 # 種名 => [調査地1, 調査地2]
-		ret2Hash = {'モノサシトンボ' => ['泥沢'], 'コバネイバゴ' => ['泥沢'], 'モリアオガエル' => ['藤井公園', 'ハッチョウ'], 'カナヘビ' => ['藤井公園'], 'ハッチョウトンボ' => ['ハッチョウ']}
+		ret2Hash = {'モノサシトンボ' => ['泥沢'], 'コバネイナゴ' => ['泥沢'], 'モリアオガエル' => ['藤井公園', 'ハッチョウ'], 'カナヘビ' => ['藤井公園'], 'ハッチョウトンボ' => ['ハッチョウ']}
 		resSpLocHash = makeSp2LocHash(resLocSpArys)
 		assert_equal ret2Hash, resSpLocHash
 # 種名リストの重複チェック
