@@ -34,6 +34,8 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		ret2Hash = {'モノサシトンボ' => ['泥沢'], 'コバネイバゴ' => ['泥沢'], 'モリアオガエル' => ['藤井公園', 'ハッチョウ'], 'カナヘビ' => ['藤井公園'], 'ハッチョウトンボ' => ['ハッチョウ']}
 		# assert_equal ret2Hash, makeSp2LocHash(ret01Ary)
 		assert_equal ret2Hash, makeSp2LocHash(locSpArys(File.read(pickFile), pickDepthAry))
-		assert_equal ['ヤマキマダラヒカゲ'], checkDupSpList(origTable(fromFile))
+		spTbl = origTable(fromFile)
+		assert_equal ['ヤマキマダラヒカゲ'], checkDupSpList(spTbl)
+
 	end
 end
