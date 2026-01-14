@@ -139,8 +139,21 @@ def whereSpList(tbl, spName)
 end
 
 # 調査リストのデータ (makeSp2LocHash) から、種名, 調査地1, 調査地2, ... , RDBランク(県, 国)
-def makeSpLocTbl(locSpHash, spTbl, locAry)
-	ret = []
+def makeSpLocTbl(sp2locHash, spTbl, locAry)
+	retAry = []
+	spTbl.each {|row|
+		spName = row[:種]
+		# ary = []
+		if sp2locHash[spName]
+			locsAry = sp2locHash[spName]
+			ary = [row[:分類群], row[:目], row[:科], row[:種]]
+			sp2locHash.delete(spName)
+		# else
+		# 	ary << [nil,nil,nil,spName]
+			retAry << ary
+		end
+	}
+	{:list => retAry, :rest => sp2locHash}
 end
 
 pickData = File.read(pickFile)
