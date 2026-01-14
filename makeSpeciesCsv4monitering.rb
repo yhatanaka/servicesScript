@@ -115,6 +115,12 @@ def makeSp2LocHash(locSpArys)
 	return retHash
 end
 
+def checkDupSpList(tbl)
+	ret = []
+	return ret
+end
+
+
 pickData = File.read(pickFile)
 pp locSpArys(pickData, pickDepthAry)
 # 例外は小さい単位で捕捉する

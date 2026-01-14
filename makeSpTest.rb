@@ -7,7 +7,7 @@ require 'pp'
 require_relative 'CsvTableUtil.rb'
 require_relative 'makeSpeciesCsv4monitering.rb'
 
-actualTestFlag = false
+actualTestFlag = true
 
 if actualTestFlag
 	require 'minitest/autorun' # Minitest ライブラリを読み込む
@@ -34,5 +34,6 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		ret2Hash = {'モノサシトンボ' => ['泥沢'], 'コバネイバゴ' => ['泥沢'], 'モリアオガエル' => ['藤井公園', 'ハッチョウ'], 'カナヘビ' => ['藤井公園'], 'ハッチョウトンボ' => ['ハッチョウ']}
 		# assert_equal ret2Hash, makeSp2LocHash(ret01Ary)
 		assert_equal ret2Hash, makeSp2LocHash(locSpArys(File.read(pickFile), pickDepthAry))
+		assert_equal ['ヤマキマダラヒカゲ'], checkDupSpList(origTable(fromFile))
 	end
 end
