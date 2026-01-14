@@ -115,8 +115,15 @@ def makeSp2LocHash(locSpArys)
 	return retHash
 end
 
+# 種名リストの重複チェック
 def checkDupSpList(tbl)
-	ret = []
+	ret2 = tbl.by_col
+	sps = ret2[:種]
+# value1 => [value1], value2 => [value2, value2]
+# 値の要素数が1より大きいもの選んで(value2 => [value2, value2])
+# 
+	ret = sps.group_by{ |e| e }.select { |k, v| v.size > 1 }.map(&:first)
+	# ret = sps.select{ |e| sps.count(e) > 1 }.uniq
 	return ret
 end
 
