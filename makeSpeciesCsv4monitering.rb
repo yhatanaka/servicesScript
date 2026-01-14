@@ -97,12 +97,19 @@ def convert_to_table(text, pickDepthAry)
 		end
 	end
 	return locSpeciesAryInAry
+# [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイバゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'モリアオガエル'], ['ハッチョウ', 'ハッチョウトンボ']]
 end
 
 def makeSp2LocHash(locSpArys)
 	retHash = {}
 	locSpArys.each {|aLocSpAry|
-		
+# すでに登録済みの種で、まだその調査地がなければ
+		if retHash[aLocSpAry[1]] && !retHash[aLocSpAry[1]].include?(aLocSpAry[0])
+			retHash[aLocSpAry[1]] << aLocSpAry[0]
+		else
+# 初出の種なら、{種名 => [地名]}
+			retHash[aLocSpAry[1]] = [aLocSpAry[0]]
+		end
 	}
 	return retHash
 end
