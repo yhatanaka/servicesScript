@@ -7,7 +7,7 @@ require 'pp'
 require_relative 'CsvTableUtil.rb'
 require_relative 'makeSpeciesCsv4monitering.rb'
 
-actualTestFlag = true
+actualTestFlag = false
 
 if actualTestFlag
 	require 'minitest/autorun' # Minitest ライブラリを読み込む
@@ -16,8 +16,8 @@ else
 	pickFile = "#{base_dir}/locSp.txt"
 	pickDepthAry = [0,nil,1]
 	fromFile = "#{base_dir}/spList.csv"
-origTable(fromFile).each {|row|
-	pp row
+origTable(fromFile).each_with_index {|row, idx|
+	puts "#{idx}: #{row}"
 }
 	exit
 end
