@@ -43,5 +43,9 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		assert_equal ['ヤマキマダラヒカゲ'], checkDupSpList(spTbl)
 		assert_equal [4, 5], whereSpList(spTbl, 'ヤマキマダラヒカゲ')
 
+		fromFile_nodup = "#{base_dir}/spList_nodup.csv"
+		spNodupTbl = origTable(fromFile_nodup)
+		assert_equal [], checkDupSpList(spNodupTbl)
+
 	end
 end
