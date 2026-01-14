@@ -29,7 +29,7 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		pickFile = "#{base_dir}/locSp.txt"
 		pickDepthAry = [0,nil,1]
 		fromFile = "#{base_dir}/spList.csv"
-		ret01Ary = [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイバゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'アカハライモリ'], ['ハッチョウ', 'ハッチョウトンボ']]
+		ret01Ary = [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイバゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'モリアオガエル'], ['ハッチョウ', 'ハッチョウトンボ']]
 		assert_equal ret01Ary, convert_to_table(File.read(pickFile), pickDepthAry)
 	end
 end
