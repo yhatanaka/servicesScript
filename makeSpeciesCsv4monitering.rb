@@ -139,7 +139,7 @@ def whereSpList(tbl, spName)
 end
 
 # 調査リストのデータ (makeSp2LocHash) から、種名, 調査地1, 調査地2, ... , RDBランク(県, 国)
-def makeSpLocTbl(locSpHash, spTbl、locAry)
+def makeSpLocTbl(locSpHash, spTbl, locAry)
 	ret = []
 end
 

@@ -50,7 +50,7 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 
 # 最終データ
 		ret3 = []
-		# assert_equal ret3, makeSpLocTbl(locSpHash, spTbl、locAry)
+		assert_equal ret3, makeSpLocTbl(resSpLocHash, spNodupTbl, ['泥沢', '藤井公園', 'ハッチョウ'])
 
 	end
 end
