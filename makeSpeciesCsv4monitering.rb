@@ -176,7 +176,20 @@ def makeSpLocTbl(sp2locHash, spTbl, locAry)
 			retAry << ary
 		end
 	}
-	{:list => retAry, :rest => sp2locHash}
+# 種名リストに載ってなかった分
+	sp2locHash.each {|name, spLocsAry|
+		ary = [nil,nil,nil,name]
+		locAry.each {|aLoc|
+			if spLocsAry.include?(aLoc)
+				ary << '●'
+			else
+				ary << nil
+			end
+		}
+		ary << nil << nil
+		retAry << ary
+	}
+	retAry
 end
 
 pickData = File.read(pickFile)
