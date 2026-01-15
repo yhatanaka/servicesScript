@@ -143,11 +143,26 @@ def makeSpLocTbl(sp2locHash, spTbl, locAry)
 	retAry = []
 	spTbl.each {|row|
 		spName = row[:種]
-		# ary = []
+# 調査リストsp2locHashに、種名リストspTblの「種」にヒットするものがあれば
 		if sp2locHash[spName]
+# data の Hash から削除するキー
+			hashName = spName
+			existInList = true
+# 調査リストsp2locHashに、","区切りで入れておいた種名リストspTblの「別名」にヒットするものがあれば…
+		elsif row[:別名]
+			row[:別名].split(',').map{|n| n.strip}.each {|altName|
+				if sp2locHash[altName]
+# data の Hash から削除するキー
+					hashName = altName
+					existInList = true
+					break
+				end
+			}
+		end
+		if existInList
 			locsAry = sp2locHash[spName]
 			ary = [row[:分類群], row[:目], row[:科], row[:種]]
-			sp2locHash.delete(spName)
+			sp2locHash.delete(hashName)
 		# else
 		# 	ary << [nil,nil,nil,spName]
 			retAry << ary
