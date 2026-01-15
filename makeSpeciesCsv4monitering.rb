@@ -192,8 +192,13 @@ def makeSpLocTbl(sp2locHash, spTbl, locAry)
 	retAry
 end
 
-pickData = File.read(pickFile)
-pp locSpArys(pickData, pickDepthAry)
+researchList = File.read(pickFile)
+pickDepthAry = [0,nil,1]
+resLocSpArys = locSpArys(researchList, pickDepthAry)
+resSpLocHash = makeSp2LocHash(resLocSpArys)
+spTbl = origTable(fromFile)
+pp checkDupSpList(spTbl)
+
 # 例外は小さい単位で捕捉する
 rescue SystemCallError => e
   puts %Q(class=[#{e.class}] message=[#{e.message}])
