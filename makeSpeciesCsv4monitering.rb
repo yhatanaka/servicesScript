@@ -160,8 +160,16 @@ def makeSpLocTbl(sp2locHash, spTbl, locAry)
 			}
 		end
 		if existInList
-			locsAry = sp2locHash[spName]
+			spLocsAry = sp2locHash[hashName]
 			ary = [row[:分類群], row[:目], row[:科], row[:種]]
+			locAry.each {|aLoc|
+				if spLocsAry.include?(aLoc)
+					ary << '●'
+				else
+					ary << nil
+				end
+			}
+			ary << row[:県] << row[:国]
 			sp2locHash.delete(hashName)
 		# else
 		# 	ary << [nil,nil,nil,spName]
