@@ -49,8 +49,16 @@ class MakeSpTest < Minitest::Test # Minitest::Test クラスを継承
 		assert_equal [], checkDupSpList(spNodupTbl)
 
 # 最終データ
-		ret3 = []
-		assert_equal ret3, makeSpLocTbl(resSpLocHash, spNodupTbl, ['泥沢', '藤井公園', 'ハッチョウ'])
+		ret3 = <<EOS
+分類群,目,科,種,泥沢,藤井公園,ハッチョウ,県,国
+昆虫類,トンボ目,トンボ科,ハッチョウトンボ,,,●,NT, 
+昆虫類,バッタ目,バッタ科,コバネイナゴ,●,,, , 
+両生類,無尾目,アオガエル科,モリアオガエル,,●,●,NT, 
+爬虫類,有隣目,カナヘビ科,ニホンカナヘビ,,●,, , 
+,,,モノサシトンボ,●,,,,
+EOS
+		tblAry = makeSpLocTbl(resSpLocHash, spNodupTbl, ['泥沢', '藤井公園', 'ハッチョウ'])
+		assert_equal ret3, makeTable([:分類群, :目, :科, :種, '泥沢', '藤井公園', 'ハッチョウ', :県, :国], tblAry).to_csv
 
 	end
 end
