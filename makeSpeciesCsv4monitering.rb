@@ -54,6 +54,10 @@ begin
 # 処理ロジック
 # [['泥沢', 'モノサシトンボ'], ['泥沢', 'コバネイバゴ'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'モリアオガエル'], ['藤井公園', 'カナヘビ'], ['ハッチョウ', 'モリアオガエル'], ['ハッチョウ', 'ハッチョウトンボ']]
 def locSpArys(text, pickDepthAry)
+# nfc 正規化されていなければ正規化
+	unless text.unicode_normalized?
+		text.unicode_normalized!
+	end
 	# 空行を除去して行ごとの配列にする
 	lines = text.lines.map(&:chomp).reject(&:empty?)
 	
@@ -197,7 +201,9 @@ pickDepthAry = [0,nil,1]
 resLocSpArys = locSpArys(researchList, pickDepthAry)
 resSpLocHash = makeSp2LocHash(resLocSpArys)
 spTbl = origTable(fromFile)
-pp checkDupSpList(spTbl)
+# pp checkDupSpList(spTbl)
+tblAry = makeSpLocTbl(resSpLocHash, spTbl, ['泥沢', '藤井公園', 'ハッチョウ'])
+puts makeTable([:分類群, :目, :科, :種, '泥沢', '藤井公園', 'ハッチョウ', :県, :国], tblAry).to_csv
 
 # 例外は小さい単位で捕捉する
 rescue SystemCallError => e

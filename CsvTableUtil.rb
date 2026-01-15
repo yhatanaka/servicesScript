@@ -10,7 +10,9 @@ require 'csv'
 	# end
 	
 	def origTable(inputCsv)
-		origTable = CSV.table(inputCsv, headers: true, header_converters: :symbol_raw)
+# nfc 正規化
+		nfcConverter = lambda { |h| h.unicode_normalize if h}
+		origTable = CSV.table(inputCsv, headers: true, header_converters: :symbol_raw, converters: [nfcConverter, :all])
 		return origTable
 	end
 	
