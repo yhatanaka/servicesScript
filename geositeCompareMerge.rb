@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #$KCODE='UTF8'
 
-# usage: ruby csv2kml.rb input.csv format.kml output.kml
+# usage: ruby geositeCompareMerge.rb --pref pref.rb input.csv format.kml output.kml
 # ジオサイト一覧のCSVファイルから、
 # require 'nkf'
 # require 'yaml'
@@ -54,7 +54,7 @@ modData = pivotedTable2Data(modTbl, keysAry)
 dataDiff = diffData(origData, modData)
 dataDiff.each {|key, value|
 	p key
-	pp makeTableByHash(newHeaderAry, value).to_csv
+	puts makeTableByHash(newHeaderAry, value).to_csv
 }
 
 =begin
