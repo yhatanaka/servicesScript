@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 #$KCODE='UTF8'
 
-# usage: ruby csv2kml.rb input.csv format.kml output.kml
+# usage: ruby selectLocSiteFromCsv.rb input.csv
+# 座標入ってるサイトを、(座標を小数点以下5桁にして) geojson で出力
 # ジオサイト一覧のCSVファイルから、
 # require 'nkf'
 # require 'yaml'
